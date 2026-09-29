@@ -1,6 +1,6 @@
 /* 日課 · Service Worker
    改版後把 VERSION 加一，舊快取會自動清掉 */
-var VERSION = 'v5';
+var VERSION = 'v6';
 var CACHE = 'daily-log-' + VERSION;
 var ASSETS = [
   './',

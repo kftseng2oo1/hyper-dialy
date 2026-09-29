@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5,user-scalable=yes">
+<title>日課 · 安裝手冊</title>
+<meta name="description" content="一分鐘把日課裝到手機桌面。注意：要先跳出 LINE 用 Safari 或 Chrome 開啟才裝得起來。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="日課">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:title" content="日課 · 安裝手冊">
+<meta property="og:description" content="一分鐘把日課裝到手機桌面。注意：要先跳出 LINE 用 Safari 或 Chrome 開啟才裝得起來。">
+<meta property="og:url" content="https://kftseng2oo1.github.io/dialy/install.html">
+<meta property="og:image" content="https://kftseng2oo1.github.io/dialy/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2F5D50">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --paper:#F6F7F2; --card:#FFFFFF; --ink:#232A2E; --soft:#6E7A80;
+  --line:#E2E6DC; --pine:#2F5D50; --pine-soft:#E7EFEA;
+  --amber:#B07D18; --amber-soft:#F7EFDC; --danger:#9B3B2E;
+  --shadow:0 1px 2px rgba(35,42,46,.06);
+  --serif:Georgia,"Songti TC","Noto Serif TC","Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#141714; --card:#1D211C; --ink:#E8EBE4; --soft:#98A29A;
+    --line:#2C322C; --pine:#7FB8A3; --pine-soft:#1E2A25;
+    --amber:#D9AE5E; --amber-soft:#2A2418; --danger:#D98A78; --shadow:none;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+body{
+  margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;
+  padding:0 0 60px;
+}
+.wrap{max-width:560px;margin:0 auto;padding:0 20px}
+
+header{padding:calc(34px + env(safe-area-inset-top)) 0 26px;text-align:center}
+header img{width:76px;height:76px;border-radius:19px;display:block;margin:0 auto 16px}
+h1{font-family:var(--serif);font-size:30px;font-weight:600;margin:0 0 8px;letter-spacing:.02em}
+header p{margin:0;color:var(--soft);font-size:15px}
+
+h2{
+  font-family:var(--serif);font-size:21px;font-weight:600;
+  margin:38px 0 4px;padding-top:26px;border-top:1px solid var(--line);
+}
+h2:first-of-type{border-top:0;padding-top:0;margin-top:30px}
+.lead{color:var(--soft);font-size:15px;margin:0 0 18px}
+
+/* 警告卡 */
+.warn{
+  background:var(--amber-soft);border-radius:16px;padding:19px 20px;margin:24px 0;
+  border-left:5px solid var(--amber);
+}
+.warn b{display:block;font-size:17px;margin-bottom:7px;color:var(--amber)}
+.warn p{margin:0;font-size:15px;line-height:1.75}
+
+/* 系統切換 */
+.os{display:flex;gap:9px;margin:0 0 22px}
+.os button{
+  flex:1;border:1px solid var(--line);background:var(--card);color:var(--soft);
+  border-radius:13px;padding:13px 0;font-family:var(--sans);font-size:16px;cursor:pointer;
+}
+.os button.on{background:var(--pine);border-color:transparent;color:#F6F7F2;font-weight:700}
+@media (prefers-color-scheme:dark){.os button.on{color:#12201B}}
+
+/* 步驟 */
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.steps>li{
+  counter-increment:s;position:relative;padding:0 0 26px 54px;
+}
+ol.steps>li::before{
+  content:counter(s);position:absolute;left:0;top:0;
+  width:36px;height:36px;border-radius:50%;background:var(--pine);color:#F6F7F2;
+  font-family:var(--serif);font-size:19px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+}
+@media (prefers-color-scheme:dark){ol.steps>li::before{color:#12201B}}
+ol.steps>li::after{
+  content:"";position:absolute;left:17.5px;top:42px;bottom:6px;width:1.5px;background:var(--line);
+}
+ol.steps>li:last-child::after{display:none}
+ol.steps h3{margin:5px 0 6px;font-size:17px;font-weight:600;line-height:1.5}
+ol.steps p{margin:0;color:var(--soft);font-size:15px}
+ol.steps p+p{margin-top:6px}
+.ic{
+  display:inline-flex;align-items:center;justify-content:center;vertical-align:-6px;
+  width:26px;height:26px;border-radius:7px;background:var(--pine-soft);margin:0 2px;
+}
+.ic svg{width:16px;height:16px;fill:none;stroke:var(--pine);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ic.dot svg{fill:var(--pine);stroke:none}
+kbd{
+  font-family:var(--sans);font-size:14.5px;background:var(--pine-soft);color:var(--pine);
+  border-radius:7px;padding:3px 9px;font-weight:600;white-space:nowrap;
+}
+
+/* 訊息範本 */
+.msg{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px 19px;box-shadow:var(--shadow);margin:16px 0 0;
+}
+.msg pre{
+  margin:0;font-family:var(--sans);font-size:15px;line-height:1.8;
+  white-space:pre-wrap;word-break:break-word;color:var(--ink);
+}
+.btn{
+  width:100%;margin-top:15px;border:0;border-radius:13px;padding:14px;
+  background:var(--pine);color:#F6F7F2;font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer;
+}
+@media (prefers-color-scheme:dark){.btn{color:#12201B}}
+.btn:active{opacity:.75}
+
+/* 問答 */
+dl{margin:0}
+dt{font-weight:600;margin:22px 0 5px;font-size:16.5px}
+dd{margin:0;color:var(--soft);font-size:15px}
+
+footer{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);color:var(--soft);font-size:14px;text-align:center}
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,14px);
+  background:var(--ink);color:var(--paper);border-radius:13px;padding:12px 18px;font-size:15px;
+  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img src="icon-192.png" alt="日課圖示">
+  <h1>日課 · 安裝手冊</h1>
+  <p>把體重與飲食記錄放到手機桌面，一分鐘完成</p>
+</header>
+
+<div class="warn">
+  <b>先看這裡：不能直接在 LINE 裡面安裝</b>
+  <p>用 LINE 點開連結時，開的是 LINE 自己的瀏覽器，它<strong>沒有「加入主畫面」這個功能</strong>，而且記錄的資料也存不住。
+  所以第一步一定要先跳出 LINE，改用 Safari（iPhone）或 Chrome（Android）開啟。</p>
+</div>
+
+<h2>選擇你的手機</h2>
+<p class="lead">下面的步驟會跟著切換。</p>
+<div class="os" id="osTabs">
+  <button type="button" data-os="ios" class="on">iPhone / iPad</button>
+  <button type="button" data-os="and">Android</button>
+</div>
+
+<!-- iOS -->
+<section id="s-ios">
+  <ol class="steps">
+    <li>
+      <h3>在 LINE 點開收到的連結</h3>
+      <p>畫面會用 LINE 內建的瀏覽器打開日課。先不要急著操作，直接看下一步。</p>
+    </li>
+    <li>
+      <h3>點右下角的
+        <span class="ic dot"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></span>
+        跳出 LINE
+      </h3>
+      <p>在畫面最下方那排工具列，最右邊有個三個點的按鈕。點下去之後選 <kbd>其他應用程式</kbd>，再選 <kbd>Safari</kbd>。</p>
+      <p>部分版本的 LINE 是顯示 <kbd>用 Safari 開啟</kbd>，看到就直接點。</p>
+    </li>
+    <li>
+      <h3>確認已經在 Safari 裡</h3>
+      <p>畫面最上方會出現網址列，下方有一排 Safari 的按鈕，就表示成功跳出來了。</p>
+    </li>
+    <li>
+      <h3>點正下方中間的分享按鈕
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M8.5 7.5L12 4l3.5 3.5"/><path d="M6 12v7a1 1 0 001 1h10a1 1 0 001-1v-7"/></svg></span>
+      </h3>
+      <p>就是那個「方框加一支向上箭頭」的圖示，在螢幕最底下正中央。</p>
+    </li>
+    <li>
+      <h3>往下滑，選 <kbd>加入主畫面</kbd></h3>
+      <p>選單裡項目很多，需要用手指往上滑一段才會看到。</p>
+    </li>
+    <li>
+      <h3>點右上角 <kbd>新增</kbd></h3>
+      <p>名稱保持「日課」就可以，不用改。</p>
+    </li>
+    <li>
+      <h3>完成</h3>
+      <p>回到桌面，會出現一個深綠色的圓錶圖示，名字叫「日課」。以後從這裡打開就好，不用再進 LINE。</p>
+    </li>
+  </ol>
+</section>
+
+<!-- Android -->
+<section id="s-and" hidden>
+  <ol class="steps">
+    <li>
+      <h3>在 LINE 點開收到的連結</h3>
+      <p>畫面會用 LINE 內建的瀏覽器打開日課。先不要急著操作，直接看下一步。</p>
+    </li>
+    <li>
+      <h3>點右上角的
+        <span class="ic dot"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></span>
+        跳出 LINE
+      </h3>
+      <p>直排三個點的按鈕，在螢幕右上角。點下去選 <kbd>用其他瀏覽器開啟</kbd>，如果跳出選單就挑 <kbd>Chrome</kbd>。</p>
+    </li>
+    <li>
+      <h3>確認已經在 Chrome 裡</h3>
+      <p>最上方出現 Chrome 的網址列，就表示成功跳出來了。</p>
+    </li>
+    <li>
+      <h3>點右上角的
+        <span class="ic dot"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></span>
+        選單
+      </h3>
+      <p>這次是 Chrome 自己的三個點，位置一樣在右上角。</p>
+    </li>
+    <li>
+      <h3>選 <kbd>安裝應用程式</kbd></h3>
+      <p>有些手機顯示的是 <kbd>加到主畫面</kbd>，意思一樣。若兩個都沒看到，往下滑找找。</p>
+    </li>
+    <li>
+      <h3>點 <kbd>安裝</kbd> 確認</h3>
+      <p>Chrome 會再問一次要不要安裝，按確定即可。</p>
+    </li>
+    <li>
+      <h3>完成</h3>
+      <p>桌面或應用程式列表會出現深綠色的圓錶圖示「日課」。以後從這裡打開就好，不用再進 LINE。</p>
+    </li>
+  </ol>
+</section>
+
+<h2>要傳給別人時</h2>
+<p class="lead">把下面這段訊息複製到 LINE 貼上就好，對方會同時收到 App 和這份手冊。</p>
+<div class="msg">
+  <pre id="tpl">日課 — 記錄每天的體重和吃了什麼
+可以拍照、看趨勢圖，資料只存在自己手機裡，不會上傳。
+
+App：
+https://kftseng2oo1.github.io/dialy/
+
+安裝步驟（一分鐘，附圖說明）：
+https://kftseng2oo1.github.io/dialy/install.html
+
+⚠️ 記得先跳出 LINE 用 Safari 或 Chrome 開，
+在 LINE 裡面是裝不起來的。</pre>
+  <button class="btn" id="copyBtn" type="button">複製這段訊息</button>
+</div>
+
+<h2>常見問題</h2>
+<dl>
+  <dt>找不到「加入主畫面」怎麼辦？</dt>
+  <dd>幾乎都是因為還停在 LINE 的瀏覽器裡。回到第 2 步，先跳到 Safari 或 Chrome 再試一次。</dd>
+
+  <dt>我的體重和照片會被別人看到嗎？</dt>
+  <dd>不會。沒有帳號也沒有伺服器，所有紀錄和照片都只存在你自己的手機裡，網路關掉也能用。</dd>
+
+  <dt>換手機的話紀錄怎麼帶走？</dt>
+  <dd>在舊手機開啟日課 → <kbd>設定</kbd> → 勾選「備份包含照片」→ <kbd>下載 JSON</kbd>，把檔案用 LINE 傳給自己或存到 Keep。新手機裝好後，到 <kbd>設定</kbd> 把內容貼進「貼上 JSON 還原」再按匯入。</dd>
+
+  <dt>刪掉 App 資料會不見嗎？</dt>
+  <dd>會。刪除前請先照上面的方式匯出備份。清除瀏覽器資料也一樣會清掉紀錄。</dd>
+
+  <dt>怎麼更新到新版本？</dt>
+  <dd>不用做任何事。在有網路的情況下打開，新版會自動下載，關掉再開一次就套用了。</dd>
+
+  <dt>沒有網路可以用嗎？</dt>
+  <dd>可以。裝到桌面之後就完全離線可用，記錄體重、拍照、看趨勢圖都不需要網路。</dd>
+</dl>
+
+<footer>日課 · 資料留在自己手機裡</footer>
+</div>
+
+<div class="toast" id="toast">已複製，去 LINE 貼上就好</div>
+
+<script>
+(function(){
+  'use strict';
+  function $(id){ return document.getElementById(id); }
+
+  /* 系統切換 */
+  var tabs = $('osTabs').getElementsByTagName('button'), i;
+  function pick(os){
+    for(var j = 0; j < tabs.length; j++){
+      tabs[j].className = (tabs[j].getAttribute('data-os') === os) ? 'on' : '';
+    }
+    $('s-ios').hidden = (os !== 'ios');
+    $('s-and').hidden = (os !== 'and');
+  }
+  for(i = 0; i < tabs.length; i++){
+    (function(b){
+      b.addEventListener('click', function(){ pick(b.getAttribute('data-os')); });
+    })(tabs[i]);
+  }
+  /* 自動判斷手機類型 */
+  var ua = navigator.userAgent || '';
+  if(/Android/i.test(ua)) pick('and');
+  else pick('ios');
+
+  /* 複製訊息 */
+  function flash(){
+    var t = $('toast');
+    t.className = 'toast on';
+    setTimeout(function(){ t.className = 'toast'; }, 2000);
+  }
+  $('copyBtn').addEventListener('click', function(){
+    var s = $('tpl').textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(s).then(flash, fallback);
+    }else fallback();
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = s; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try{ document.execCommand('copy'); flash(); }
+      catch(e){ $('toast').textContent = '請長按上面的文字手動複製'; flash(); }
+      document.body.removeChild(ta);
+    }
+  });
+})();
+</script>
+</body>
+</html>
