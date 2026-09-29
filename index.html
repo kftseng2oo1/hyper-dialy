@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5,user-scalable=yes">
+<title>日課 · 體重與飲食記錄</title>
+<meta name="description" content="記錄每天的體重、血壓脈搏、飲水尿量和吃了什麼，可以拍照、看趨勢圖與 BMI。完全離線，資料只存在自己手機裡，不會上傳。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="日課">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:title" content="日課 · 體重與飲食記錄">
+<meta property="og:description" content="記錄每天的體重、血壓脈搏、飲水尿量和吃了什麼，可以拍照、看趨勢圖與 BMI。完全離線，資料只存在自己手機裡，不會上傳。">
+<meta property="og:url" content="https://kftseng2oo1.github.io/dialy/">
+<meta property="og:image" content="https://kftseng2oo1.github.io/dialy/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2F5D50">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="日課">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --paper:#F6F7F2; --card:#FFFFFF; --ink:#232A2E; --soft:#6E7A80;
+  --line:#E2E6DC; --pine:#2F5D50; --pine-soft:#E7EFEA;
+  --amber:#B07D18; --amber-soft:#F7EFDC; --danger:#9B3B2E;
+  --shadow:0 1px 2px rgba(35,42,46,.06);
+  --serif:Georgia,"Songti TC","Noto Serif TC","Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#141714; --card:#1D211C; --ink:#E8EBE4; --soft:#98A29A;
+    --line:#2C322C; --pine:#7FB8A3; --pine-soft:#1E2A25;
+    --amber:#D9AE5E; --amber-soft:#2A2418; --danger:#D98A78;
+    --shadow:none;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.55;
+  padding-bottom:calc(74px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:520px;margin:0 auto;padding:0 18px}
+
+/* 日期列 */
+.datebar{
+  position:sticky;top:0;z-index:20;background:var(--paper);
+  padding-top:calc(10px + env(safe-area-inset-top));
+  border-bottom:1px solid var(--line);
+}
+.datebar .row{display:flex;align-items:center;gap:8px;padding:6px 0 12px}
+.dnav{
+  width:38px;height:38px;flex:0 0 38px;border:1px solid var(--line);background:var(--card);
+  border-radius:11px;color:var(--ink);font-size:17px;line-height:1;cursor:pointer;
+}
+.dnav:disabled{opacity:.32}
+.dtitle{flex:1;text-align:center}
+.dtitle b{display:block;font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:.02em}
+.dtitle span{display:block;font-size:12px;color:var(--soft);margin-top:-2px}
+.today-btn{
+  border:0;background:var(--pine-soft);color:var(--pine);font-family:var(--sans);
+  font-size:13px;padding:7px 12px;border-radius:9px;cursor:pointer;font-weight:600;
+}
+.today-btn[hidden]{display:none}
+
+/* 卡片 */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin:16px 0;box-shadow:var(--shadow);
+}
+.card h2{
+  margin:0 0 14px;font-family:var(--sans);font-size:14px;font-weight:600;
+  color:var(--soft);letter-spacing:.04em;
+}
+
+/* 體重 */
+.wt-main{display:flex;align-items:flex-end;gap:10px}
+.wt-num{font-family:var(--serif);font-size:62px;line-height:.9;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.wt-num.empty{color:var(--line);font-size:44px}
+.wt-unit{font-size:16px;color:var(--soft);padding-bottom:8px}
+.wt-delta{margin-top:10px;font-size:13px;color:var(--soft);min-height:20px}
+.wt-delta i{font-style:normal;font-weight:600}
+.up{color:var(--amber)} .down{color:var(--pine)}
+.wt-edit{display:flex;gap:8px;margin-top:16px;align-items:center}
+.step{
+  width:46px;height:46px;flex:0 0 46px;border:1px solid var(--line);background:transparent;
+  border-radius:12px;font-size:22px;color:var(--ink);cursor:pointer;line-height:1;
+}
+input,select,textarea{font-family:var(--sans);font-size:16px;color:var(--ink);background:var(--card)}
+.wt-input{
+  flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:12px;
+  text-align:center;font-family:var(--serif);font-size:22px;font-variant-numeric:tabular-nums;
+}
+.wt-input:focus,.f-name:focus,.f-kcal:focus,textarea:focus{outline:2px solid var(--pine);outline-offset:1px;border-color:transparent}
+
+/* 按鈕 */
+.btn{
+  border:0;border-radius:12px;padding:13px 16px;font-family:var(--sans);font-size:15px;
+  font-weight:600;cursor:pointer;background:var(--pine);color:#F6F7F2;
+}
+@media (prefers-color-scheme:dark){.btn{color:#12201B}}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:500}
+.btn.amber{background:var(--amber)}
+.btn.wide{width:100%;margin-top:10px}
+.btn:active{opacity:.75}
+
+/* 飲食 */
+.chips{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.chip{
+  border:1px solid var(--line);background:transparent;color:var(--soft);
+  border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;font-family:var(--sans);
+}
+.chip.on{background:var(--amber-soft);border-color:transparent;color:var(--amber);font-weight:600}
+.f-row{display:flex;gap:8px}
+.f-name{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 13px}
+.f-kcal{width:88px;flex:0 0 88px;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 10px;text-align:center;font-variant-numeric:tabular-nums}
+.meals{list-style:none;margin:16px 0 0;padding:0}
+.meals li{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
+.tag{
+  flex:0 0 auto;font-size:12px;font-weight:600;color:var(--amber);background:var(--amber-soft);
+  padding:4px 9px;border-radius:7px;
+}
+.mname{flex:1;min-width:0;word-break:break-word}
+.kcal{color:var(--soft);font-size:13px;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.del{
+  flex:0 0 auto;border:0;background:transparent;color:var(--soft);font-size:19px;
+  cursor:pointer;padding:4px 2px;line-height:1;
+}
+.sum{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--soft);display:flex;justify-content:space-between}
+.sum b{font-family:var(--serif);font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.empty-note{color:var(--soft);font-size:14px;margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+
+/* 血壓・水分 */
+.v-row{display:flex;gap:8px;align-items:flex-end}
+.v-cell{flex:1;min-width:0}
+.v-cell label{display:block;font-size:11.5px;color:var(--soft);margin-bottom:5px;text-align:center}
+.v-cell input{
+  width:100%;height:46px;border:1px solid var(--line);border-radius:12px;text-align:center;
+  font-family:var(--serif);font-size:20px;font-variant-numeric:tabular-nums;
+}
+.v-cell input[type=time]{font-family:var(--sans);font-size:15px}
+.v-cell input:focus{outline:2px solid var(--pine);outline-offset:1px;border-color:transparent}
+.v-list{list-style:none;margin:16px 0 0;padding:0}
+.v-list li{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
+.v-time{flex:0 0 auto;font-size:12px;color:var(--soft);font-variant-numeric:tabular-nums;min-width:40px}
+.v-main{flex:1;min-width:0;font-family:var(--serif);font-size:19px;font-variant-numeric:tabular-nums}
+.v-main small{font-family:var(--sans);font-size:12px;color:var(--soft);margin-left:5px;font-variant-numeric:normal}
+.v-tag{flex:0 0 auto;font-size:12px;font-weight:600;padding:4px 9px;border-radius:7px}
+.v-sum{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--soft);display:flex;justify-content:space-between;gap:10px}
+.v-sum b{font-family:var(--serif);font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.quick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--soft);margin:0 0 4px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:3px;margin-right:5px}
+
+/* 熱量估算 */
+.est-toggle{
+  width:100%;margin-top:9px;border:1px dashed var(--line);background:transparent;
+  color:var(--soft);border-radius:12px;padding:11px;font-size:14px;font-family:var(--sans);cursor:pointer;
+}
+.est-toggle.on{color:var(--amber);border-color:var(--amber);border-style:solid}
+.est{margin-top:11px;border:1px solid var(--line);border-radius:14px;padding:15px 15px 14px;background:var(--paper)}
+.est-row{margin-bottom:14px}
+.est-row>b{display:block;font-size:13px;font-weight:600;color:var(--soft);margin-bottom:8px}
+.est .chips{margin-bottom:0}
+.chip.sm{padding:6px 13px;font-size:13.5px}
+.est-hint{font-size:11.5px;color:var(--soft);margin:7px 0 0;line-height:1.65}
+.est-foot{display:flex;align-items:center;gap:12px;padding-top:13px;border-top:1px solid var(--line)}
+.est-foot div{flex:1;font-size:12px;color:var(--soft)}
+.est-foot b{font-family:var(--serif);font-size:27px;color:var(--ink);margin:0 6px;font-variant-numeric:tabular-nums}
+.est-foot .btn{width:auto;padding:12px 22px;margin:0}
+.est-note{font-size:11.5px;color:var(--soft);margin:11px 0 0;line-height:1.65}
+
+/* BMI */
+.bmi{margin-top:17px;padding-top:15px;border-top:1px solid var(--line)}
+.bmi-top{display:flex;align-items:baseline;gap:9px;font-size:13px;color:var(--soft)}
+.bmi-top b{font-family:var(--serif);font-size:27px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+.bmi-top em{font-style:normal;margin-left:auto;font-size:13px;font-weight:600}
+.bmi-bar{position:relative;margin-top:12px}
+.bmi-track{display:flex;height:8px;border-radius:5px;overflow:hidden;background:var(--line)}
+.bmi-track i{display:block;height:100%}
+.bmi-mark{
+  position:absolute;top:-4px;left:0;width:4px;height:16px;border-radius:3px;
+  background:var(--ink);margin-left:-2px;
+}
+.bmi-ticks{position:relative;height:15px;margin-top:5px;font-size:10px;color:var(--soft)}
+.bmi-ticks span{position:absolute;transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.bmi-hint{margin:17px 0 0;padding-top:15px;border-top:1px solid var(--line);font-size:13px;color:var(--soft)}
+.stat i.sub{display:block;font-style:normal;font-size:11px;color:var(--soft);margin-top:3px;font-variant-numeric:tabular-nums}
+
+/* 照片 */
+.f-photo{display:flex;align-items:center;gap:11px;margin-top:9px}
+.photo-btn{
+  border:1px dashed var(--line);background:transparent;color:var(--soft);border-radius:12px;
+  padding:11px 15px;font-size:14px;font-family:var(--sans);cursor:pointer;
+}
+.photo-btn:active{opacity:.7}
+#photoInput{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.prev{position:relative;display:inline-block;line-height:0}
+.prev img{width:54px;height:54px;object-fit:cover;border-radius:11px;display:block;background:var(--line)}
+.prev button{
+  position:absolute;top:-7px;right:-7px;width:23px;height:23px;border-radius:50%;border:0;
+  background:var(--ink);color:var(--paper);font-size:14px;line-height:1;cursor:pointer;padding:0;
+}
+.thumb{
+  width:44px;height:44px;flex:0 0 44px;object-fit:cover;border-radius:10px;
+  background:var(--pine-soft);cursor:pointer;
+}
+.day-thumbs{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.day-thumbs img{width:52px;height:52px;object-fit:cover;border-radius:10px;background:var(--pine-soft)}
+.lb{
+  position:fixed;top:0;right:0;bottom:0;left:0;z-index:80;background:rgba(10,12,10,.93);
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:84vh;border-radius:12px;touch-action:pinch-zoom}
+.lb p{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));color:#C9CFC8;font-size:13px}
+.chk{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--soft);margin:13px 2px 0}
+.chk input{width:18px;height:18px;flex:0 0 18px}
+
+/* 歷程 */
+.day{border-bottom:1px solid var(--line);padding:15px 0}
+.day:last-child{border-bottom:0}
+.day-h{display:flex;align-items:baseline;gap:10px;cursor:pointer}
+.day-d{font-family:var(--serif);font-size:17px;font-weight:600;flex:1}
+.day-w{font-family:var(--serif);font-size:19px;color:var(--pine);font-variant-numeric:tabular-nums}
+.day-f{margin:7px 0 0;font-size:14px;color:var(--soft);line-height:1.7}
+
+/* 趨勢 */
+.stats{display:flex;gap:10px;margin-bottom:6px}
+.stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 12px;text-align:center}
+.stat span{display:block;font-size:12px;color:var(--soft);margin-bottom:3px}
+.stat b{font-family:var(--serif);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.chartbox{overflow:hidden}
+svg{display:block;width:100%;height:auto}
+
+/* 設定 */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;color:var(--soft);margin-bottom:6px}
+.field input{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 13px}
+textarea{width:100%;height:110px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;resize:vertical;font-size:14px}
+.grid2{display:flex;gap:9px}
+.grid2 .btn{flex:1}
+.note{font-size:13px;color:var(--soft);line-height:1.7}
+
+/* 分頁 */
+.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;
+  background:var(--card);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.tab{
+  flex:1;border:0;background:transparent;color:var(--soft);font-family:var(--sans);
+  font-size:11px;padding:9px 0 8px;cursor:pointer;display:block;
+}
+.tab svg{width:22px;height:22px;margin:0 auto 2px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--pine);font-weight:600}
+.view{display:none}
+.view.on{display:block}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));
+  transform:translate(-50%,14px);z-index:60;
+  background:var(--ink);color:var(--paper);border-radius:13px;
+  padding:12px 16px;font-size:14px;display:flex;align-items:center;gap:14px;
+  max-width:88%;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;
+}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{border:0;background:transparent;color:var(--pine);font-weight:700;font-size:14px;font-family:var(--sans);cursor:pointer;padding:0}
+@media (prefers-color-scheme:dark){.toast button{color:#8FD3BB}}
+
+/* 對話框 */
+.mask{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(20,23,20,.45);z-index:70;display:none;align-items:center;justify-content:center;padding:24px}
+.mask.on{display:flex}
+.dlg{background:var(--card);border-radius:18px;padding:22px;max-width:330px;width:100%}
+.dlg p{margin:0 0 18px;font-size:15px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="datebar">
+  <div class="wrap row">
+    <button class="dnav" id="prevDay" type="button" aria-label="前一天">‹</button>
+    <div class="dtitle"><b id="dTitle">—</b><span id="dSub"></span></div>
+    <button class="dnav" id="nextDay" type="button" aria-label="後一天">›</button>
+    <button class="today-btn" id="goToday" type="button" hidden>今天</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 今日 -->
+  <section class="view on" id="v-today">
+    <div class="card">
+      <h2>體重</h2>
+      <div class="wt-main">
+        <div class="wt-num empty" id="wtNum">—</div>
+        <div class="wt-unit">公斤</div>
+      </div>
+      <div class="wt-delta" id="wtDelta"></div>
+      <div class="bmi" id="bmiBox" hidden>
+        <div class="bmi-top"><span>BMI</span><b id="bmiVal">—</b><em id="bmiCat"></em></div>
+        <div class="bmi-bar">
+          <div class="bmi-track">
+            <i style="flex:17.5;background:var(--soft);opacity:.26"></i>
+            <i style="flex:27.5;background:var(--pine);opacity:.5"></i>
+            <i style="flex:15;background:var(--amber);opacity:.38"></i>
+            <i style="flex:40;background:var(--amber);opacity:.62"></i>
+          </div>
+          <span class="bmi-mark" id="bmiMark" hidden></span>
+        </div>
+        <div class="bmi-ticks">
+          <span style="left:17.5%">18.5</span><span style="left:45%">24</span><span style="left:60%">27</span>
+        </div>
+      </div>
+      <p class="bmi-hint" id="bmiHint">在「設定」填入身高後，這裡會顯示 BMI。</p>
+      <div class="wt-edit">
+        <button class="step" id="wtMinus" type="button" aria-label="減 0.1">−</button>
+        <input class="wt-input" id="wtInput" type="number" step="0.1" min="0" max="400" inputmode="decimal" placeholder="0.0">
+        <button class="step" id="wtPlus" type="button" aria-label="加 0.1">+</button>
+      </div>
+      <button class="btn wide" id="wtSave" type="button">記下體重</button>
+    </div>
+
+    <div class="card">
+      <h2>血壓・脈搏</h2>
+      <div class="v-row">
+        <div class="v-cell"><label for="bpS">收縮壓</label><input id="bpS" type="number" min="50" max="300" inputmode="numeric" placeholder="120"></div>
+        <div class="v-cell"><label for="bpD">舒張壓</label><input id="bpD" type="number" min="30" max="200" inputmode="numeric" placeholder="80"></div>
+        <div class="v-cell"><label for="bpP">脈搏</label><input id="bpP" type="number" min="20" max="250" inputmode="numeric" placeholder="72"></div>
+        <div class="v-cell"><label for="bpT">時間</label><input id="bpT" type="time"></div>
+      </div>
+      <button class="btn wide" id="bpAdd" type="button">記下這筆</button>
+      <ul class="v-list" id="bpList"></ul>
+      <div class="v-sum" id="bpSum" hidden><span>今日平均</span><b>—</b></div>
+      <p class="empty-note" id="bpEmpty">量完血壓後填入三個數字。同一天可以記多筆，早晚各量會更有參考價值。</p>
+    </div>
+
+    <div class="card">
+      <h2>水分</h2>
+      <div class="quick" id="drinkQuick"></div>
+      <div class="v-row">
+        <div class="v-cell" style="flex:2"><label for="flAmt">毫升</label><input id="flAmt" type="number" min="1" max="5000" inputmode="numeric" placeholder="250"></div>
+        <div class="v-cell"><label for="flT">時間</label><input id="flT" type="time"></div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <button class="btn ghost" id="flIn" type="button">記為飲水</button>
+        <button class="btn ghost" id="flOut" type="button">記為尿量</button>
+      </div>
+      <ul class="v-list" id="flList"></ul>
+      <div class="v-sum" id="flSum" hidden><span>今日 飲水 <b>0</b> ml</span><span>尿量 <b>0</b> ml</span></div>
+      <p class="empty-note" id="flEmpty">按上面的快速鍵記飲水，或自己填毫升數。尿量請填實際量測的數值。</p>
+    </div>
+
+    <div class="card">
+      <h2>吃了什麼</h2>
+      <div class="chips" id="mealChips"></div>
+      <div class="f-row">
+        <input class="f-name" id="fName" type="text" placeholder="例如：滷肉飯 一碗">
+        <input class="f-kcal" id="fKcal" type="number" min="0" max="9999" inputmode="numeric" placeholder="熱量">
+      </div>
+      <div class="f-photo">
+        <button class="photo-btn" id="photoBtn" type="button">＋ 加照片</button>
+        <input type="file" id="photoInput" accept="image/*">
+        <div class="prev" id="photoPrev" hidden>
+          <img id="photoPrevImg" alt="待加入的照片">
+          <button type="button" id="photoClear" aria-label="移除照片">×</button>
+        </div>
+      </div>
+      <button class="est-toggle" id="estToggle" type="button">不知道熱量？用份量估算</button>
+      <div class="est" id="estPanel" hidden>
+        <div id="estRows"></div>
+        <div class="est-foot">
+          <div>估計 <b id="estTotal">0</b> 大卡</div>
+          <button class="btn" id="estApply" type="button">帶入</button>
+        </div>
+        <p class="est-note">依食物代換表粗估，誤差約 ±20%。帶入後仍可手動修改數字。</p>
+      </div>
+      <button class="btn amber wide" id="fAdd" type="button">加入</button>
+      <ul class="meals" id="mealList"></ul>
+      <div class="sum" id="kcalSum" hidden><span>今日熱量合計</span><b>0</b></div>
+      <p class="empty-note" id="mealEmpty">還沒有紀錄。輸入食物名稱後按加入，熱量可以留空。</p>
+    </div>
+  </section>
+
+  <!-- 歷程 -->
+  <section class="view" id="v-log">
+    <div class="card">
+      <h2>歷程</h2>
+      <div id="logList"></div>
+    </div>
+  </section>
+
+  <!-- 趨勢 -->
+  <section class="view" id="v-chart">
+    <div class="chips" id="rangeChips" style="margin:18px 0 12px"></div>
+    <div class="stats">
+      <div class="stat"><span>最近</span><b id="sLast">—</b><i class="sub" id="sBmi"></i></div>
+      <div class="stat"><span>期間變化</span><b id="sDiff">—</b></div>
+      <div class="stat"><span>平均</span><b id="sAvg">—</b></div>
+    </div>
+    <div class="card chartbox">
+      <h2>體重曲線</h2>
+      <div id="chartWeight"></div>
+    </div>
+    <div class="card chartbox" id="kcalCard" hidden>
+      <h2>每日熱量</h2>
+      <div id="chartKcal"></div>
+    </div>
+    <div class="card chartbox" id="bpCard" hidden>
+      <h2>血壓（每日平均）</h2>
+      <p class="legend"><span><i style="background:var(--pine)"></i>收縮壓</span><span><i style="background:var(--amber)"></i>舒張壓</span></p>
+      <div id="chartBp"></div>
+    </div>
+    <div class="card chartbox" id="pulseCard" hidden>
+      <h2>脈搏（每日平均）</h2>
+      <div id="chartPulse"></div>
+    </div>
+    <div class="card chartbox" id="flCard" hidden>
+      <h2>每日尿量</h2>
+      <div id="chartFl"></div>
+    </div>
+  </section>
+
+  <!-- 設定 -->
+  <section class="view" id="v-set">
+    <div class="card">
+      <h2>身高與目標</h2>
+      <div class="field">
+        <label for="heightCm">身高（公分）</label>
+        <input id="heightCm" type="number" step="0.5" min="80" max="250" inputmode="decimal" placeholder="填入後才會計算 BMI">
+      </div>
+      <div class="field">
+        <label for="goalW">目標體重（公斤，選填）</label>
+        <input id="goalW" type="number" step="0.1" min="0" max="400" inputmode="decimal" placeholder="留空則不顯示">
+      </div>
+      <button class="btn wide ghost" id="goalSave" type="button">儲存</button>
+    </div>
+    <div class="card">
+      <h2>備份</h2>
+      <label class="chk"><input type="checkbox" id="withPhotos">備份包含照片（檔案會大很多）</label>
+      <div class="grid2" style="margin-top:12px">
+        <button class="btn ghost" id="expJson" type="button">下載 JSON</button>
+        <button class="btn ghost" id="expCsv" type="button">下載 CSV</button>
+      </div>
+      <button class="btn wide ghost" id="copyJson" type="button">複製 JSON 到剪貼簿</button>
+      <div class="field" style="margin-top:18px">
+        <label for="impText">貼上 JSON 還原（會與現有資料合併）</label>
+        <textarea id="impText" placeholder='{"weights":{...},"meals":{...}}'></textarea>
+      </div>
+      <button class="btn wide" id="impRun" type="button">匯入</button>
+    </div>
+    <div class="card">
+      <h2>照片</h2>
+      <p class="note" id="photoNote">統計中…</p>
+      <button class="btn wide ghost" id="clearPhotos" type="button" style="color:var(--danger);margin-top:12px">清除所有照片</button>
+    </div>
+    <div class="card">
+      <h2>資料</h2>
+      <p class="note" id="storeNote"></p>
+      <button class="btn wide ghost" id="wipe" type="button" style="color:var(--danger)">清除所有紀錄</button>
+    </div>
+    <p class="note" style="text-align:center;margin:22px 0 30px">日課 · 單檔離線可用<br>在 Safari 選「加入主畫面」即可當 App 開啟</p>
+  </section>
+
+</div>
+
+<nav class="tabs" id="tabs">
+  <button class="tab on" data-v="today" type="button"><svg viewBox="0 0 24 24"><path d="M4 8h16v12H4z"/><path d="M8 8V5h8v3"/><path d="M12 11v5"/></svg>今日</button>
+  <button class="tab" data-v="log" type="button"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>歷程</button>
+  <button class="tab" data-v="chart" type="button"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 15l4-5 3 3 5-6"/></svg>趨勢</button>
+  <button class="tab" data-v="set" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M17.7 6.3l-1.4 1.4M7.7 16.3l-1.4 1.4"/></svg>設定</button>
+</nav>
+
+<div class="toast" id="toast"><span id="toastMsg"></span><button id="toastAct" type="button" hidden></button></div>
+
+<div class="lb" id="lb"><img id="lbImg" alt="飲食照片"><p>點一下關閉</p></div>
+
+<div class="mask" id="mask">
+  <div class="dlg">
+    <p id="dlgMsg"></p>
+    <div class="grid2">
+      <button class="btn ghost" id="dlgNo" type="button">取消</button>
+      <button class="btn" id="dlgYes" type="button" style="background:var(--danger)">確定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- 儲存層：localStorage 不可用時自動退回記憶體 ---------- */
+  var KEY = 'daily-log-v1';
+  var memStore = null, usingMem = false;
+  function readRaw(){
+    try{ var v = window.localStorage.getItem(KEY); return v; }
+    catch(e){ usingMem = true; return memStore; }
+  }
+  function writeRaw(s){
+    try{ window.localStorage.setItem(KEY, s); }
+    catch(e){ usingMem = true; memStore = s; }
+  }
+
+  var data = { weights:{}, meals:{}, settings:{}, vitals:{}, fluids:{} };
+  (function load(){
+    var raw = readRaw();
+    if(!raw) return;
+    try{
+      var o = JSON.parse(raw);
+      if(o && typeof o === 'object'){
+        data.weights  = o.weights  || {};
+        data.meals    = o.meals    || {};
+        data.settings = o.settings || {};
+        data.vitals   = o.vitals   || {};
+        data.fluids   = o.fluids   || {};
+      }
+    }catch(e){}
+  })();
+  function save(){ writeRaw(JSON.stringify(data)); }
+
+  /* ---------- 照片儲存層：IndexedDB，不可用時退回記憶體 ---------- */
+  var IDB_NAME = 'daily-log-photos', idb = null, idbFail = false, idbQ = [], memPhotos = {};
+  function flushQ(db){ var q = idbQ, i; idbQ = []; for(i = 0; i < q.length; i++) q[i](db); }
+  function withDB(fn){
+    if(idb){ fn(idb); return; }
+    if(idbFail){ fn(null); return; }
+    idbQ.push(fn);
+    if(idbQ.length > 1) return;
+    var req;
+    try{
+      if(!window.indexedDB) throw new Error('no idb');
+      req = window.indexedDB.open(IDB_NAME, 1);
+    }catch(e){ idbFail = true; flushQ(null); return; }
+    req.onupgradeneeded = function(ev){
+      var db = ev.target.result;
+      if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos');
+      if(!db.objectStoreNames.contains('thumbs')) db.createObjectStore('thumbs');
+    };
+    req.onsuccess = function(){ idb = req.result; flushQ(idb); };
+    req.onerror = function(){ idbFail = true; flushQ(null); };
+    req.onblocked = function(){ idbFail = true; flushQ(null); };
+  }
+  function photoPut(id, full, thumb, cb){
+    withDB(function(db){
+      if(!db){ memPhotos[id] = { f:full, t:thumb }; if(cb) cb(); return; }
+      try{
+        var tx = db.transaction(['photos','thumbs'], 'readwrite');
+        tx.objectStore('photos').put(full, id);
+        tx.objectStore('thumbs').put(thumb, id);
+        tx.oncomplete = function(){ if(cb) cb(); };
+        tx.onerror = function(){ memPhotos[id] = { f:full, t:thumb }; if(cb) cb(); };
+      }catch(e){ memPhotos[id] = { f:full, t:thumb }; if(cb) cb(); }
+    });
+  }
+  function photoGet(store, id, cb){
+    if(memPhotos[id]){ cb(store === 'thumbs' ? memPhotos[id].t : memPhotos[id].f); return; }
+    withDB(function(db){
+      if(!db){ cb(null); return; }
+      try{
+        var r = db.transaction([store], 'readonly').objectStore(store).get(id);
+        r.onsuccess = function(){ cb(r.result || null); };
+        r.onerror = function(){ cb(null); };
+      }catch(e){ cb(null); }
+    });
+  }
+  function photoDel(ids, cb){
+    var i;
+    for(i = 0; i < ids.length; i++) delete memPhotos[ids[i]];
+    withDB(function(db){
+      if(!db){ if(cb) cb(); return; }
+      try{
+        var tx = db.transaction(['photos','thumbs'], 'readwrite'), j;
+        for(j = 0; j < ids.length; j++){
+          tx.objectStore('photos')['delete'](ids[j]);
+          tx.objectStore('thumbs')['delete'](ids[j]);
+        }
+        tx.oncomplete = function(){ if(cb) cb(); };
+        tx.onerror = function(){ if(cb) cb(); };
+      }catch(e){ if(cb) cb(); }
+    });
+  }
+  function photoKeys(cb){
+    var mem = [], k;
+    for(k in memPhotos){ if(memPhotos.hasOwnProperty(k)) mem.push(k); }
+    withDB(function(db){
+      if(!db){ cb(mem); return; }
+      try{
+        var st = db.transaction(['photos'], 'readonly').objectStore('photos'), out = mem.slice();
+        if(st.openKeyCursor){
+          var c = st.openKeyCursor();
+          c.onsuccess = function(){
+            var cur2 = c.result;
+            if(cur2){ out.push(cur2.key); cur2['continue'](); } else cb(out);
+          };
+          c.onerror = function(){ cb(out); };
+        }else if(st.getAllKeys){
+          var g = st.getAllKeys();
+          g.onsuccess = function(){ cb(out.concat(g.result || [])); };
+          g.onerror = function(){ cb(out); };
+        }else cb(out);
+      }catch(e){ cb(mem); }
+    });
+  }
+  /* 逐張走訪，避免一次把所有照片讀進記憶體 */
+  function photoEach(step, done){
+    var k, mem = [];
+    for(k in memPhotos){ if(memPhotos.hasOwnProperty(k)) mem.push(k); }
+    var i;
+    for(i = 0; i < mem.length; i++) step(mem[i], memPhotos[mem[i]].f, memPhotos[mem[i]].t);
+    withDB(function(db){
+      if(!db){ done(); return; }
+      try{
+        var tx = db.transaction(['photos','thumbs'], 'readonly');
+        var c = tx.objectStore('photos').openCursor();
+        c.onsuccess = function(){
+          var cur2 = c.result;
+          if(!cur2){ return; }
+          var id = cur2.key, full = cur2.value;
+          var tr = tx.objectStore('thumbs').get(id);
+          tr.onsuccess = function(){ step(id, full, tr.result || null); };
+          cur2['continue']();
+        };
+        tx.oncomplete = function(){ done(); };
+        tx.onerror = function(){ done(); };
+      }catch(e){ done(); }
+    });
+  }
+  /* 清掉沒有任何紀錄引用的孤兒照片 */
+  function gcPhotos(){
+    var used = {}, k, i;
+    for(k in data.meals){
+      if(!data.meals.hasOwnProperty(k)) continue;
+      for(i = 0; i < data.meals[k].length; i++){ if(data.meals[k][i].p) used[data.meals[k][i].p] = 1; }
+    }
+    photoKeys(function(keys){
+      var dead = [], j;
+      for(j = 0; j < keys.length; j++){ if(!used[keys[j]]) dead.push(keys[j]); }
+      if(dead.length) photoDel(dead, refreshPhotoNote);
+    });
+  }
+  function refreshPhotoNote(){
+    var n = 0, bytes = 0;
+    photoEach(function(id, full, thumb){
+      n++;
+      bytes += (full ? full.length : 0) * 0.75 + (thumb ? thumb.length : 0) * 0.75;
+    }, function(){
+      var note = $('photoNote');
+      if(!note) return;
+      if(!n){ note.textContent = '目前沒有照片。照片只會存在這台裝置裡，不會上傳。'; return; }
+      var sz = bytes >= 1048576 ? (bytes/1048576).toFixed(1) + ' MB' : Math.round(bytes/1024) + ' KB';
+      note.textContent = '共 ' + n + ' 張，約 ' + sz + '。' +
+        (idbFail ? '（這個環境無法使用 IndexedDB，照片只保留在本次開啟期間。）'
+                 : '照片存在裝置的瀏覽器資料庫，不會上傳，也不含在一般 JSON 備份裡。');
+    });
+  }
+
+  /* ---------- 縮圖處理 ---------- */
+  function drawScaled(img, max, q){
+    var w = img.width || img.naturalWidth, h = img.height || img.naturalHeight;
+    var sc = Math.min(1, max / Math.max(w, h));
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * sc));
+    c.height = Math.max(1, Math.round(h * sc));
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    try{ return c.toDataURL('image/jpeg', q); }catch(e){ return null; }
+  }
+  function shrinkFile(file, cb){
+    if(!file || !window.FileReader){ cb(null); return; }
+    var fr = new FileReader();
+    fr.onerror = function(){ cb(null); };
+    fr.onload = function(){
+      var img = new Image();
+      img.onerror = function(){ cb(null); };
+      img.onload = function(){
+        var full = drawScaled(img, 1000, 0.72), thumb = drawScaled(img, 220, 0.6);
+        cb(full && thumb ? { full:full, thumb:thumb } : null);
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+
+  /* ---------- 日期工具（一律用本地時間，避免 UTC 位移） ---------- */
+  var WD = ['週日','週一','週二','週三','週四','週五','週六'];
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+  function keyOf(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+  function dateOf(k){ var p = k.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function todayKey(){ return keyOf(new Date()); }
+  function shift(k, n){ var d = dateOf(k); d.setDate(d.getDate() + n); return keyOf(d); }
+  function label(k){ var d = dateOf(k); return (d.getMonth()+1) + '月' + d.getDate() + '日'; }
+  function sub(k){
+    var d = dateOf(k), t = todayKey();
+    if(k === t) return '今天 · ' + WD[d.getDay()];
+    if(k === shift(t,-1)) return '昨天 · ' + WD[d.getDay()];
+    return d.getFullYear() + ' · ' + WD[d.getDay()];
+  }
+  var cur = todayKey();
+
+  /* ---------- 小工具 ---------- */
+  function $(id){ return document.getElementById(id); }
+  function el(tag, cls, txt){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(txt !== undefined && txt !== null) e.textContent = txt;
+    return e;
+  }
+  function r1(n){ return Math.round(n * 10) / 10; }
+  function fmt(n){ return r1(n).toFixed(1); }
+
+  var toastTimer = null, undoFn = null;
+  function toast(msg, actLabel, fn){
+    var t = $('toast'), b = $('toastAct');
+    $('toastMsg').textContent = msg;
+    undoFn = fn || null;
+    if(actLabel && fn){ b.textContent = actLabel; b.hidden = false; }
+    else { b.hidden = true; }
+    t.className = 'toast on';
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.className = 'toast'; undoFn = null; }, fn ? 5000 : 2200);
+  }
+  $('toastAct').addEventListener('click', function(){
+    if(undoFn){ undoFn(); undoFn = null; }
+    $('toast').className = 'toast';
+  });
+
+  var dlgFn = null;
+  function ask(msg, fn){ $('dlgMsg').textContent = msg; dlgFn = fn; $('mask').className = 'mask on'; }
+  $('dlgNo').addEventListener('click', function(){ $('mask').className = 'mask'; dlgFn = null; });
+  $('dlgYes').addEventListener('click', function(){
+    $('mask').className = 'mask';
+    if(dlgFn){ dlgFn(); dlgFn = null; }
+  });
+
+  /* ---------- 日期列 ---------- */
+  function renderDate(){
+    $('dTitle').textContent = label(cur);
+    $('dSub').textContent = sub(cur);
+    $('nextDay').disabled = (cur >= todayKey());
+    $('goToday').hidden = (cur === todayKey());
+  }
+  $('prevDay').addEventListener('click', function(){ cur = shift(cur,-1); renderAll(); });
+  $('nextDay').addEventListener('click', function(){
+    if(cur >= todayKey()) return;
+    cur = shift(cur,1); renderAll();
+  });
+  $('goToday').addEventListener('click', function(){ cur = todayKey(); renderAll(); });
+
+  /* ---------- 體重 ---------- */
+  function sortedDates(){
+    var ks = [], k;
+    for(k in data.weights){ if(data.weights.hasOwnProperty(k)) ks.push(k); }
+    ks.sort();
+    return ks;
+  }
+  function prevWeight(k){
+    var ks = sortedDates(), i;
+    for(i = ks.length - 1; i >= 0; i--){ if(ks[i] < k) return { k:ks[i], w:data.weights[ks[i]] }; }
+    return null;
+  }
+  function avgLast(k, n){
+    var ks = sortedDates(), pick = [], i;
+    for(i = ks.length - 1; i >= 0 && pick.length < n; i--){ if(ks[i] < k) pick.push(data.weights[ks[i]]); }
+    if(!pick.length) return null;
+    var s = 0;
+    for(i = 0; i < pick.length; i++) s += pick[i];
+    return s / pick.length;
+  }
+  /* BMI：分級採衛福部國健署成人標準 */
+  function bmiOf(w){
+    var h = parseFloat(data.settings.height);
+    if(!h || h < 80 || h > 250 || !w) return null;
+    var m = h / 100;
+    return w / (m * m);
+  }
+  function bmiCat(b){
+    if(b < 18.5) return { n:'過輕', c:'var(--soft)' };
+    if(b < 24)   return { n:'健康範圍', c:'var(--pine)' };
+    if(b < 27)   return { n:'過重', c:'var(--amber)' };
+    return { n:'肥胖', c:'var(--amber)' };
+  }
+  /* 尺規範圍 15–35，對應 0–100% */
+  function bmiPct(b){
+    var x = (b - 15) / 20 * 100;
+    if(x < 0) x = 0;
+    if(x > 100) x = 100;
+    return x;
+  }
+  function renderBmi(w){
+    var b = bmiOf(w), box = $('bmiBox'), hint = $('bmiHint');
+    var hasH = !!parseFloat(data.settings.height);
+    if(!hasH){ box.hidden = true; hint.hidden = false; return; }
+    hint.hidden = true;
+    box.hidden = false;
+    if(b === null){
+      $('bmiVal').textContent = '—';
+      $('bmiCat').textContent = '記下體重後計算';
+      $('bmiCat').style.color = 'var(--soft)';
+      $('bmiMark').hidden = true;
+      return;
+    }
+    var cat = bmiCat(b);
+    $('bmiVal').textContent = b.toFixed(1);
+    $('bmiCat').textContent = cat.n;
+    $('bmiCat').style.color = cat.c;
+    $('bmiMark').hidden = false;
+    $('bmiMark').style.left = bmiPct(b).toFixed(1) + '%';
+  }
+
+  function renderWeight(){
+    var w = data.weights[cur], n = $('wtNum'), d = $('wtDelta');
+    if(w === undefined){
+      n.textContent = '—'; n.className = 'wt-num empty';
+      $('wtInput').value = '';
+      var g = prevWeight(cur);
+      $('wtInput').placeholder = g ? fmt(g.w) : '0.0';
+      d.textContent = '';
+    }else{
+      n.textContent = fmt(w); n.className = 'wt-num';
+      $('wtInput').value = fmt(w);
+      var p = prevWeight(cur), a = avgLast(cur, 7);
+      while(d.firstChild) d.removeChild(d.firstChild);
+      if(p){
+        var diff = r1(w - p.w);
+        d.appendChild(document.createTextNode('較 ' + label(p.k) + ' '));
+        d.appendChild(el('i', diff > 0 ? 'up' : (diff < 0 ? 'down' : ''),
+          (diff > 0 ? '+' : '') + diff.toFixed(1) + ' 公斤'));
+      }
+      if(a){
+        d.appendChild(document.createTextNode((p ? '　·　' : '') + '近七次平均 ' + fmt(a)));
+      }
+    }
+    renderBmi(w);
+  }
+  function bumpWeight(step){
+    var v = parseFloat($('wtInput').value);
+    if(isNaN(v)){
+      var g = prevWeight(cur);
+      v = data.weights[cur] !== undefined ? data.weights[cur] : (g ? g.w : 60);
+    }
+    v = r1(v + step);
+    if(v < 0) v = 0;
+    $('wtInput').value = v.toFixed(1);
+  }
+  $('wtMinus').addEventListener('click', function(){ bumpWeight(-0.1); });
+  $('wtPlus').addEventListener('click', function(){ bumpWeight(0.1); });
+  $('wtSave').addEventListener('click', function(){
+    var v = parseFloat($('wtInput').value);
+    if(isNaN(v) || v <= 0 || v > 400){ toast('請輸入 0 到 400 之間的體重'); return; }
+    data.weights[cur] = r1(v); save();
+    renderWeight(); renderLog(); renderChart();
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    toast(label(cur) + ' 記下 ' + fmt(v) + ' 公斤');
+  });
+
+  /* ---------- 飲食 ---------- */
+  var TYPES = ['早餐','午餐','晚餐','點心'];
+  var curType = '早餐';
+  (function buildChips(){
+    var box = $('mealChips'), i;
+    for(i = 0; i < TYPES.length; i++){
+      (function(t){
+        var b = el('button', 'chip', t);
+        b.type = 'button';
+        b.addEventListener('click', function(){ curType = t; paintChips(); });
+        box.appendChild(b);
+      })(TYPES[i]);
+    }
+    paintChips();
+  })();
+  function paintChips(){
+    var cs = $('mealChips').childNodes, i;
+    for(i = 0; i < cs.length; i++){
+      cs[i].className = (cs[i].textContent === curType) ? 'chip on' : 'chip';
+    }
+  }
+  function guessType(){
+    var h = new Date().getHours();
+    if(h < 10) return '早餐';
+    if(h < 14) return '午餐';
+    if(h < 20) return '晚餐';
+    return '點心';
+  }
+  curType = guessType(); paintChips();
+
+  /* 選取待加入的照片 */
+  var pending = null;
+  $('photoBtn').addEventListener('click', function(){ $('photoInput').click(); });
+  $('photoInput').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    if(!f){ return; }
+    $('photoBtn').textContent = '處理中…';
+    shrinkFile(f, function(res){
+      $('photoInput').value = '';
+      $('photoBtn').textContent = '＋ 加照片';
+      if(!res){ toast('這張照片讀不出來，換一張試試'); return; }
+      pending = res;
+      $('photoPrevImg').src = res.thumb;
+      $('photoPrev').hidden = false;
+      $('photoBtn').textContent = '換一張';
+    });
+  });
+  $('photoClear').addEventListener('click', function(){
+    pending = null;
+    $('photoPrev').hidden = true;
+    $('photoPrevImg').removeAttribute('src');
+    $('photoBtn').textContent = '＋ 加照片';
+  });
+  function resetPhotoPicker(){
+    pending = null;
+    $('photoPrev').hidden = true;
+    $('photoPrevImg').removeAttribute('src');
+    $('photoBtn').textContent = '＋ 加照片';
+  }
+  /* 燈箱 */
+  function openPhoto(id){
+    photoGet('photos', id, function(src){
+      if(!src){ toast('找不到這張照片'); return; }
+      $('lbImg').src = src;
+      $('lb').className = 'lb on';
+    });
+  }
+  $('lb').addEventListener('click', function(){
+    $('lb').className = 'lb';
+    $('lbImg').removeAttribute('src');
+  });
+
+  function mealsOf(k){ return data.meals[k] || []; }
+  function renderMeals(){
+    var list = $('mealList'), arr = mealsOf(cur), i, total = 0, any = false;
+    while(list.firstChild) list.removeChild(list.firstChild);
+    var order = {}, j;
+    for(j = 0; j < TYPES.length; j++) order[TYPES[j]] = j;
+    var sorted = arr.slice().sort(function(a,b){ return (order[a.t]||0) - (order[b.t]||0); });
+    for(i = 0; i < sorted.length; i++){
+      (function(m){
+        var li = el('li');
+        if(m.p){
+          var th = el('img','thumb');
+          th.alt = m.n;
+          th.addEventListener('click', function(){ openPhoto(m.p); });
+          photoGet('thumbs', m.p, function(src){ if(src) th.src = src; });
+          li.appendChild(th);
+        }
+        li.appendChild(el('span','tag',m.t));
+        li.appendChild(el('span','mname',m.n));
+        if(m.k){ li.appendChild(el('span','kcal',m.k + ' 大卡')); total += m.k; any = true; }
+        var b = el('button','del','×');
+        b.type = 'button';
+        b.setAttribute('aria-label','刪除 ' + m.n);
+        b.addEventListener('click', function(){ removeMeal(m.id); });
+        li.appendChild(b);
+        list.appendChild(li);
+      })(sorted[i]);
+    }
+    $('mealEmpty').hidden = (arr.length > 0);
+    var s = $('kcalSum');
+    s.hidden = !any;
+    if(any) s.lastChild.textContent = total + ' 大卡';
+  }
+
+  /* ---------- 份量估算熱量 ----------
+     係數來自食物代換表：主食 1.3 kcal/g、蔬菜 0.25、水果每份 60、
+     蛋白質分低脂 1.2 / 中脂 1.9 / 高脂 3.2。烹調用油以加法計，不用乘數。 */
+  var EST_ROWS = [
+    { k:'main', n:'主食（飯、麵、麵包、地瓜）', s:'飯',
+      o:[['無',0],['半碗',130],['1 碗',260],['1.5 碗',390],['2 碗',520]] },
+    { k:'prot', n:'肉、魚、蛋、豆', s:'肉', g:true,
+      o:[['無',0],['半掌',50],['1 掌',100],['1.5 掌',150],['2 掌',200]],
+      f:[['低脂',1.2],['中脂',1.9],['高脂',3.2]],
+      hint:'低脂：魚、蝦、雞胸、豆腐、蛋白　中脂：雞腿、瘦豬肉、全蛋、豆干　高脂：五花肉、香腸、絞肉' },
+    { k:'veg', n:'蔬菜', s:'菜', o:[['無',0],['半拳',12],['1 拳',25],['2 拳',50]] },
+    { k:'fruit', n:'水果', s:'水果', o:[['無',0],['1 份',60],['2 份',120]],
+      hint:'一份約一個拳頭大，或切塊裝滿一個飯碗' },
+    { k:'milk', n:'乳品', s:'奶', o:[['無',0],['半杯',75],['1 杯',150]] },
+    { k:'cook', n:'烹調方式', s:'', o:[['清淡',0],['快炒',50],['油炸',150],['勾芡',80]],
+      hint:'一把青菜用燙的約 25 大卡，油炒後可能超過 100，油量跟份量無關，所以另外加。' }
+  ];
+  var estSel = { main:0, prot:0, veg:0, fruit:0, milk:0, cook:0 }, estFat = 1.9;
+  var estLbl = { main:'', prot:'', veg:'', fruit:'', milk:'', cook:'' };
+
+  function estSum(){
+    return estSel.main + Math.round(estSel.prot * estFat) +
+           estSel.veg + estSel.fruit + estSel.milk + estSel.cook;
+  }
+  function estName(){
+    var parts = [], i, r;
+    for(i = 0; i < EST_ROWS.length; i++){
+      r = EST_ROWS[i];
+      if(r.k === 'cook') continue;
+      if(estSel[r.k] > 0 && estLbl[r.k]) parts.push(estLbl[r.k] + r.s);
+    }
+    var out = parts.join('・');
+    if(estSel.cook > 0 && estLbl.cook) out += (out ? '（' + estLbl.cook + '）' : estLbl.cook);
+    return out;
+  }
+  function estPaint(){
+    $('estTotal').textContent = estSum();
+  }
+  (function buildEst(){
+    var box = $('estRows'), i;
+    for(i = 0; i < EST_ROWS.length; i++){
+      (function(r){
+        var row = el('div','est-row');
+        row.appendChild(el('b', null, r.n));
+        if(r.f){
+          var fbox = el('div','chips'), j;
+          for(j = 0; j < r.f.length; j++){
+            (function(pair){
+              var fb = el('button','chip sm' + (pair[1] === estFat ? ' on' : ''), pair[0]);
+              fb.type = 'button';
+              fb.addEventListener('click', function(){
+                estFat = pair[1];
+                var cs = fbox.childNodes, m;
+                for(m = 0; m < cs.length; m++){
+                  cs[m].className = (cs[m].textContent === pair[0]) ? 'chip sm on' : 'chip sm';
+                }
+                estPaint();
+              });
+              fbox.appendChild(fb);
+            })(r.f[j]);
+          }
+          row.appendChild(fbox);
+        }
+        var obox = el('div','chips');
+        obox.style.marginTop = r.f ? '8px' : '0';
+        var k2;
+        for(k2 = 0; k2 < r.o.length; k2++){
+          (function(pair, isFirst){
+            var b2 = el('button','chip sm' + (isFirst ? ' on' : ''), pair[0]);
+            b2.type = 'button';
+            b2.addEventListener('click', function(){
+              estSel[r.k] = pair[1];
+              estLbl[r.k] = (pair[1] === 0) ? '' : pair[0];
+              var cs = obox.childNodes, m;
+              for(m = 0; m < cs.length; m++){
+                cs[m].className = (cs[m].textContent === pair[0]) ? 'chip sm on' : 'chip sm';
+              }
+              estPaint();
+            });
+            obox.appendChild(b2);
+          })(r.o[k2], k2 === 0);
+        }
+        row.appendChild(obox);
+        if(r.hint) row.appendChild(el('p','est-hint', r.hint));
+        box.appendChild(row);
+      })(EST_ROWS[i]);
+    }
+  })();
+  function estReset(){
+    var k;
+    for(k in estSel){ if(estSel.hasOwnProperty(k)){ estSel[k] = 0; estLbl[k] = ''; } }
+    estFat = 1.9;
+    var rows = $('estRows').getElementsByClassName('chips'), i, j;
+    for(i = 0; i < rows.length; i++){
+      var cs = rows[i].childNodes;
+      for(j = 0; j < cs.length; j++){
+        cs[j].className = 'chip sm';
+      }
+      /* 每組預設回到第一個（無／低脂那組回中脂） */
+      if(cs.length && cs[0].textContent === '低脂') cs[1].className = 'chip sm on';
+      else if(cs.length) cs[0].className = 'chip sm on';
+    }
+    estPaint();
+  }
+  $('estToggle').addEventListener('click', function(){
+    var open = $('estPanel').hidden;
+    $('estPanel').hidden = !open;
+    this.className = open ? 'est-toggle on' : 'est-toggle';
+    this.textContent = open ? '收起估算' : '不知道熱量？用份量估算';
+  });
+  $('estApply').addEventListener('click', function(){
+    var t = estSum();
+    if(!t){ toast('先選一下吃了哪些'); return; }
+    $('fKcal').value = t;
+    if(!$('fName').value.replace(/^\s+|\s+$/g,'')) $('fName').value = estName();
+    $('estPanel').hidden = true;
+    $('estToggle').className = 'est-toggle';
+    $('estToggle').textContent = '不知道熱量？用份量估算';
+    toast('已帶入約 ' + t + ' 大卡，可以再修改');
+  });
+
+  function addMeal(){
+    var name = $('fName').value.replace(/^\s+|\s+$/g,'');
+    if(!name && !pending){ toast('先寫下吃了什麼，或加一張照片'); $('fName').focus(); return; }
+    if(!name) name = curType + '（照片）';
+    var kc = parseInt($('fKcal').value, 10);
+    if(isNaN(kc) || kc < 0) kc = 0;
+    var rec = { id: String(Date.now()) + String(Math.floor(Math.random()*1000)),
+                t: curType, n: name, k: kc };
+    var shot = pending;
+    if(shot) rec.p = 'p' + rec.id;
+    if(!data.meals[cur]) data.meals[cur] = [];
+    data.meals[cur].push(rec);
+    save();
+    $('fName').value = ''; $('fKcal').value = '';
+    resetPhotoPicker();
+    estReset();
+    if(shot){
+      photoPut(rec.p, shot.full, shot.thumb, function(){
+        renderMeals(); renderLog(); refreshPhotoNote();
+      });
+    }
+    renderMeals(); renderLog(); renderChart();
+    toast('已加入 ' + name);
+  }
+  function removeMeal(id){
+    var arr = data.meals[cur] || [], i, gone = null, at = -1;
+    for(i = 0; i < arr.length; i++){ if(arr[i].id === id){ gone = arr[i]; at = i; break; } }
+    if(!gone) return;
+    arr.splice(at,1); save(); renderMeals(); renderLog(); renderChart();
+    var key = cur;
+    toast('已刪除 ' + gone.n, '復原', function(){
+      if(!data.meals[key]) data.meals[key] = [];
+      data.meals[key].splice(at, 0, gone);
+      save(); renderMeals(); renderLog(); renderChart();
+    });
+  }
+  $('fAdd').addEventListener('click', addMeal);
+  $('fName').addEventListener('keydown', function(e){ if(e.keyCode === 13) addMeal(); });
+  $('fKcal').addEventListener('keydown', function(e){ if(e.keyCode === 13) addMeal(); });
+
+
+  /* ---------- 血壓・脈搏 ---------- */
+  function nowHM(){
+    var d = new Date();
+    return pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function vitalsOf(k){ return data.vitals[k] || []; }
+  /* 居家血壓標準（2022 台灣高血壓治療指引：≥130/80 為高血壓） */
+  function bpCat(s, d){
+    if(s >= 140 || d >= 90) return { n:'第二期', c:'var(--danger)' };
+    if(s >= 130 || d >= 80) return { n:'第一期', c:'var(--amber)' };
+    if(s >= 120) return { n:'偏高', c:'var(--soft)' };
+    return { n:'正常', c:'var(--pine)' };
+  }
+  function renderVitals(){
+    var list = $('bpList'), arr = vitalsOf(cur).slice(), i;
+    arr.sort(function(a,b){ return a.t < b.t ? -1 : (a.t > b.t ? 1 : 0); });
+    while(list.firstChild) list.removeChild(list.firstChild);
+    var ss = 0, dd = 0, pp = 0, pn = 0;
+    for(i = 0; i < arr.length; i++){
+      (function(v){
+        var li = el('li');
+        li.appendChild(el('span','v-time', v.t || ''));
+        var m = el('span','v-main', v.s + '/' + v.d);
+        var sm = el('small', null, 'mmHg' + (v.p ? '　脈搏 ' + v.p : ''));
+        m.appendChild(sm);
+        li.appendChild(m);
+        var cat = bpCat(v.s, v.d);
+        var tg = el('span','v-tag', cat.n);
+        tg.style.color = cat.c;
+        tg.style.background = 'var(--pine-soft)';
+        li.appendChild(tg);
+        var b = el('button','del','×');
+        b.type = 'button';
+        b.setAttribute('aria-label','刪除這筆血壓');
+        b.addEventListener('click', function(){ removeVital(v.id); });
+        li.appendChild(b);
+        list.appendChild(li);
+      })(arr[i]);
+      ss += arr[i].s; dd += arr[i].d;
+      if(arr[i].p){ pp += arr[i].p; pn++; }
+    }
+    $('bpEmpty').hidden = (arr.length > 0);
+    var sum = $('bpSum');
+    sum.hidden = (arr.length === 0);
+    if(arr.length){
+      sum.lastChild.textContent = Math.round(ss/arr.length) + '/' + Math.round(dd/arr.length) +
+        (pn ? '　脈搏 ' + Math.round(pp/pn) : '');
+    }
+  }
+  function addVital(){
+    var s = parseInt($('bpS').value, 10), d = parseInt($('bpD').value, 10),
+        p = parseInt($('bpP').value, 10), t = $('bpT').value || nowHM();
+    if(isNaN(s) || s < 50 || s > 300){ toast('收縮壓請填 50 到 300 之間'); $('bpS').focus(); return; }
+    if(isNaN(d) || d < 30 || d > 200){ toast('舒張壓請填 30 到 200 之間'); $('bpD').focus(); return; }
+    if(d >= s){ toast('舒張壓應該小於收縮壓，再確認一下'); return; }
+    if(isNaN(p) || p < 20 || p > 250) p = 0;
+    if(!data.vitals[cur]) data.vitals[cur] = [];
+    data.vitals[cur].push({ id:String(Date.now()) + String(Math.floor(Math.random()*1000)),
+                            t:t, s:s, d:d, p:p });
+    save();
+    $('bpS').value = ''; $('bpD').value = ''; $('bpP').value = ''; $('bpT').value = nowHM();
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    renderVitals(); renderLog(); renderChart();
+    toast('已記下 ' + s + '/' + d);
+  }
+  function removeVital(id){
+    var arr = data.vitals[cur] || [], i, gone = null, at = -1;
+    for(i = 0; i < arr.length; i++){ if(arr[i].id === id){ gone = arr[i]; at = i; break; } }
+    if(!gone) return;
+    arr.splice(at, 1); save(); renderVitals(); renderLog(); renderChart();
+    var key = cur;
+    toast('已刪除 ' + gone.s + '/' + gone.d, '復原', function(){
+      if(!data.vitals[key]) data.vitals[key] = [];
+      data.vitals[key].splice(at, 0, gone);
+      save(); renderVitals(); renderLog(); renderChart();
+    });
+  }
+  $('bpAdd').addEventListener('click', addVital);
+
+  /* ---------- 水分 ---------- */
+  var DRINKS = [200, 350, 500];
+  (function buildDrinks(){
+    var box = $('drinkQuick'), i;
+    for(i = 0; i < DRINKS.length; i++){
+      (function(ml){
+        var b = el('button','chip sm', '＋' + ml + ' ml');
+        b.type = 'button';
+        b.addEventListener('click', function(){ addFluid('in', ml); });
+        box.appendChild(b);
+      })(DRINKS[i]);
+    }
+  })();
+  function fluidsOf(k){ return data.fluids[k] || []; }
+  function renderFluids(){
+    var list = $('flList'), arr = fluidsOf(cur).slice(), i;
+    arr.sort(function(a,b){ return a.t < b.t ? -1 : (a.t > b.t ? 1 : 0); });
+    while(list.firstChild) list.removeChild(list.firstChild);
+    var tin = 0, tout = 0;
+    for(i = 0; i < arr.length; i++){
+      (function(f){
+        var li = el('li');
+        li.appendChild(el('span','v-time', f.t || ''));
+        var tg = el('span','tag', f.k === 'in' ? '飲水' : '尿量');
+        if(f.k === 'in'){ tg.style.color = 'var(--pine)'; tg.style.background = 'var(--pine-soft)'; }
+        li.appendChild(tg);
+        var m = el('span','v-main', String(f.ml));
+        m.appendChild(el('small', null, 'ml'));
+        li.appendChild(m);
+        var b = el('button','del','×');
+        b.type = 'button';
+        b.setAttribute('aria-label','刪除這筆');
+        b.addEventListener('click', function(){ removeFluid(f.id); });
+        li.appendChild(b);
+        list.appendChild(li);
+      })(arr[i]);
+      if(arr[i].k === 'in') tin += arr[i].ml; else tout += arr[i].ml;
+    }
+    $('flEmpty').hidden = (arr.length > 0);
+    var sum = $('flSum');
+    sum.hidden = (arr.length === 0);
+    if(arr.length){
+      sum.childNodes[0].getElementsByTagName('b')[0].textContent = tin;
+      sum.childNodes[1].getElementsByTagName('b')[0].textContent = tout;
+    }
+  }
+  function addFluid(kind, ml){
+    if(ml === undefined){
+      ml = parseInt($('flAmt').value, 10);
+      if(isNaN(ml) || ml < 1 || ml > 5000){ toast('請填 1 到 5000 之間的毫升數'); $('flAmt').focus(); return; }
+    }
+    var t = $('flT').value || nowHM();
+    if(!data.fluids[cur]) data.fluids[cur] = [];
+    data.fluids[cur].push({ id:String(Date.now()) + String(Math.floor(Math.random()*1000)),
+                            t:t, k:kind, ml:ml });
+    save();
+    $('flAmt').value = ''; $('flT').value = nowHM();
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    renderFluids(); renderLog(); renderChart();
+    toast((kind === 'in' ? '飲水 ' : '尿量 ') + ml + ' ml');
+  }
+  function removeFluid(id){
+    var arr = data.fluids[cur] || [], i, gone = null, at = -1;
+    for(i = 0; i < arr.length; i++){ if(arr[i].id === id){ gone = arr[i]; at = i; break; } }
+    if(!gone) return;
+    arr.splice(at, 1); save(); renderFluids(); renderLog(); renderChart();
+    var key = cur;
+    toast('已刪除', '復原', function(){
+      if(!data.fluids[key]) data.fluids[key] = [];
+      data.fluids[key].splice(at, 0, gone);
+      save(); renderFluids(); renderLog(); renderChart();
+    });
+  }
+  $('flIn').addEventListener('click', function(){ addFluid('in'); });
+  $('flOut').addEventListener('click', function(){ addFluid('out'); });
+
+  /* 每日彙總，供圖表與歷程使用 */
+  function bpDaily(){
+    var out = [], k, cutoff = null, ks = [];
+    if(curRange) cutoff = shift(todayKey(), -(curRange - 1));
+    for(k in data.vitals){ if(data.vitals.hasOwnProperty(k) && data.vitals[k].length) ks.push(k); }
+    ks.sort();
+    var i, j;
+    for(i = 0; i < ks.length; i++){
+      if(cutoff && ks[i] < cutoff) continue;
+      var a = data.vitals[ks[i]], s = 0, d = 0, p = 0, pn = 0;
+      for(j = 0; j < a.length; j++){ s += a[j].s; d += a[j].d; if(a[j].p){ p += a[j].p; pn++; } }
+      out.push({ k:ks[i], s:s/a.length, d:d/a.length, p: pn ? p/pn : null });
+    }
+    return out;
+  }
+  function fluidDaily(kind){
+    var out = [], k, ks = [], cutoff = null;
+    if(curRange) cutoff = shift(todayKey(), -(curRange - 1));
+    for(k in data.fluids){ if(data.fluids.hasOwnProperty(k) && data.fluids[k].length) ks.push(k); }
+    ks.sort();
+    var i, j;
+    for(i = 0; i < ks.length; i++){
+      if(cutoff && ks[i] < cutoff) continue;
+      var a = data.fluids[ks[i]], t = 0;
+      for(j = 0; j < a.length; j++){ if(a[j].k === kind) t += a[j].ml; }
+      if(t > 0) out.push({ k:ks[i], v:t });
+    }
+    return out;
+  }
+
+  /* 通用折線圖：series = [{pts:[{k,v}], color}]，refs = [{v, color}] */
+  function lineChart(box, series, refs, unit){
+    var W = 340, H = 180, PL = 36, PR = 8, PT = 12, PB = 22, i, j;
+    var vals = [], n = 0, keys = null;
+    for(i = 0; i < series.length; i++){
+      for(j = 0; j < series[i].pts.length; j++) vals.push(series[i].pts[j].v);
+      if(series[i].pts.length > n){ n = series[i].pts.length; keys = series[i].pts; }
+    }
+    if(!vals.length){ box.innerHTML = ''; box.appendChild(el('p','note','這段期間沒有紀錄。')); return; }
+    for(i = 0; i < refs.length; i++) vals.push(refs[i].v);
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if(hi - lo < 4){ lo -= 2; hi += 2; }
+    var padv = (hi - lo) * 0.18; lo -= padv; hi += padv;
+    function X(idx, len){ return len === 1 ? (PL + (W-PL-PR)/2) : PL + (W-PL-PR) * idx / (len-1); }
+    function Y(v){ return PT + (H-PT-PB) * (hi - v) / (hi - lo); }
+    var g = '', gl;
+    for(gl = 0; gl <= 3; gl++){
+      var vv = lo + (hi - lo) * gl / 3, y = Y(vv);
+      g += '<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W-PR) + '" y2="' + y.toFixed(1) + '" stroke="var(--line)" stroke-width="1"/>';
+      g += '<text x="' + (PL-6) + '" y="' + (y+3.5).toFixed(1) + '" text-anchor="end" font-size="9" fill="var(--soft)">' + Math.round(vv) + '</text>';
+    }
+    for(i = 0; i < refs.length; i++){
+      if(refs[i].v < lo || refs[i].v > hi) continue;
+      g += '<line x1="' + PL + '" y1="' + Y(refs[i].v).toFixed(1) + '" x2="' + (W-PR) + '" y2="' + Y(refs[i].v).toFixed(1) +
+           '" stroke="' + refs[i].color + '" stroke-width="1.1" stroke-dasharray="4 4" opacity="0.7"/>';
+    }
+    for(i = 0; i < series.length; i++){
+      var pts = series[i].pts, dp = '';
+      for(j = 0; j < pts.length; j++) dp += (j ? ' L' : 'M') + X(j, pts.length).toFixed(1) + ' ' + Y(pts[j].v).toFixed(1);
+      if(pts.length > 1) g += '<path d="' + dp + '" fill="none" stroke="' + series[i].color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+      var rr = pts.length > 40 ? 1.6 : 2.6;
+      for(j = 0; j < pts.length; j++){
+        g += '<circle cx="' + X(j, pts.length).toFixed(1) + '" cy="' + Y(pts[j].v).toFixed(1) + '" r="' + rr +
+             '" fill="var(--card)" stroke="' + series[i].color + '" stroke-width="1.7"/>';
+      }
+    }
+    if(keys){
+      g += '<text x="' + PL + '" y="' + (H-6) + '" font-size="9" fill="var(--soft)">' + label(keys[0].k) + '</text>';
+      if(keys.length > 1) g += '<text x="' + (W-PR) + '" y="' + (H-6) + '" text-anchor="end" font-size="9" fill="var(--soft)">' + label(keys[keys.length-1].k) + '</text>';
+    }
+    box.innerHTML = svgTag(g, W, H);
+  }
+
+  /* 通用長條圖 */
+  function barChart(box, pts, color){
+    var W = 340, H = 150, PL = 36, PR = 8, PT = 12, PB = 22, i;
+    if(!pts.length){ box.innerHTML = ''; return; }
+    var maxv = 0;
+    for(i = 0; i < pts.length; i++) if(pts[i].v > maxv) maxv = pts[i].v;
+    var gap = pts.length > 20 ? 1 : 4;
+    var bw = (W - PL - PR - gap * (pts.length-1)) / pts.length;
+    if(bw < 1.5) bw = 1.5;
+    if(bw > 30) bw = 30;
+    var g = '';
+    for(i = 0; i < pts.length; i++){
+      var bh = (H - PT - PB) * pts[i].v / maxv, bx = PL + i * (bw + gap);
+      g += '<rect x="' + bx.toFixed(1) + '" y="' + (H - PB - bh).toFixed(1) + '" width="' + bw.toFixed(1) +
+           '" height="' + bh.toFixed(1) + '" rx="' + (bw > 6 ? 2 : 0.8) + '" fill="' + color + '" opacity="0.85"/>';
+    }
+    g += '<line x1="' + PL + '" y1="' + (H-PB) + '" x2="' + (W-PR) + '" y2="' + (H-PB) + '" stroke="var(--line)"/>';
+    g += '<text x="' + (PL-6) + '" y="' + (PT+8) + '" text-anchor="end" font-size="9" fill="var(--soft)">' + maxv + '</text>';
+    g += '<text x="' + PL + '" y="' + (H-6) + '" font-size="9" fill="var(--soft)">' + label(pts[0].k) + '</text>';
+    if(pts.length > 1) g += '<text x="' + (W-PR) + '" y="' + (H-6) + '" text-anchor="end" font-size="9" fill="var(--soft)">' + label(pts[pts.length-1].k) + '</text>';
+    box.innerHTML = svgTag(g, W, H);
+  }
+
+  function renderVitalCharts(){
+    var bd = bpDaily(), i;
+    $('bpCard').hidden = (bd.length === 0);
+    if(bd.length){
+      var sPts = [], dPts = [], pPts = [];
+      for(i = 0; i < bd.length; i++){
+        sPts.push({ k:bd[i].k, v:Math.round(bd[i].s) });
+        dPts.push({ k:bd[i].k, v:Math.round(bd[i].d) });
+        if(bd[i].p !== null) pPts.push({ k:bd[i].k, v:Math.round(bd[i].p) });
+      }
+      lineChart($('chartBp'),
+        [{ pts:sPts, color:'var(--pine)' }, { pts:dPts, color:'var(--amber)' }],
+        [{ v:130, color:'var(--pine)' }, { v:80, color:'var(--amber)' }]);
+      $('pulseCard').hidden = (pPts.length === 0);
+      if(pPts.length) lineChart($('chartPulse'), [{ pts:pPts, color:'var(--pine)' }], []);
+    }else{
+      $('pulseCard').hidden = true;
+    }
+    var fo = fluidDaily('out');
+    $('flCard').hidden = (fo.length === 0);
+    if(fo.length) barChart($('chartFl'), fo, 'var(--pine)');
+  }
+
+  /* ---------- 歷程 ---------- */
+  function allDates(){
+    var set = {}, k, out = [];
+    for(k in data.weights){ if(data.weights.hasOwnProperty(k)) set[k] = 1; }
+    for(k in data.meals){ if(data.meals.hasOwnProperty(k) && data.meals[k].length) set[k] = 1; }
+    for(k in data.vitals){ if(data.vitals.hasOwnProperty(k) && data.vitals[k].length) set[k] = 1; }
+    for(k in data.fluids){ if(data.fluids.hasOwnProperty(k) && data.fluids[k].length) set[k] = 1; }
+    for(k in set){ if(set.hasOwnProperty(k)) out.push(k); }
+    out.sort(); out.reverse();
+    return out;
+  }
+  function renderLog(){
+    var box = $('logList'), ks = allDates(), i;
+    while(box.firstChild) box.removeChild(box.firstChild);
+    if(!ks.length){
+      box.appendChild(el('p','note','目前沒有任何紀錄。回到「今日」開始記下第一筆。'));
+      return;
+    }
+    for(i = 0; i < ks.length; i++){
+      (function(k){
+        var d = el('div','day');
+        var h = el('div','day-h');
+        var t = el('div','day-d', label(k) + '　' + WD[dateOf(k).getDay()]);
+        h.appendChild(t);
+        if(data.weights[k] !== undefined) h.appendChild(el('div','day-w', fmt(data.weights[k]) + ' kg'));
+        h.addEventListener('click', function(){ cur = k; switchTo('today'); renderAll(); window.scrollTo(0,0); });
+        d.appendChild(h);
+        var ms = mealsOf(k), j, parts = [], tot = 0, byType = {}, ti;
+        for(j = 0; j < ms.length; j++){
+          if(!byType[ms[j].t]) byType[ms[j].t] = [];
+          byType[ms[j].t].push(ms[j].n);
+          tot += (ms[j].k || 0);
+        }
+        for(ti = 0; ti < TYPES.length; ti++){
+          if(byType[TYPES[ti]]) parts.push(TYPES[ti] + '：' + byType[TYPES[ti]].join('、'));
+        }
+        if(parts.length){
+          var p = el('p','day-f', parts.join('　·　') + (tot ? '　（' + tot + ' 大卡）' : ''));
+          d.appendChild(p);
+        }
+        var shots = [], si;
+        for(si = 0; si < ms.length; si++){ if(ms[si].p) shots.push(ms[si].p); }
+        if(shots.length){
+          var row = el('div','day-thumbs');
+          for(si = 0; si < shots.length && si < 6; si++){
+            (function(pid){
+              var im = el('img');
+              im.alt = '飲食照片';
+              im.addEventListener('click', function(ev){ ev.stopPropagation(); openPhoto(pid); });
+              photoGet('thumbs', pid, function(src){ if(src) im.src = src; });
+              row.appendChild(im);
+            })(shots[si]);
+          }
+          d.appendChild(row);
+        }
+        var vs = (data.vitals[k] || []), vi, vtxt = [];
+        for(vi = 0; vi < vs.length; vi++){
+          vtxt.push(vs[vi].t + ' ' + vs[vi].s + '/' + vs[vi].d + (vs[vi].p ? '（' + vs[vi].p + '）' : ''));
+        }
+        if(vtxt.length) d.appendChild(el('p','day-f','血壓　' + vtxt.join('\u3000·\u3000')));
+        var fs = (data.fluids[k] || []), fi, fin = 0, fout = 0;
+        for(fi = 0; fi < fs.length; fi++){ if(fs[fi].k === 'in') fin += fs[fi].ml; else fout += fs[fi].ml; }
+        if(fin || fout){
+          d.appendChild(el('p','day-f','水分　' + (fin ? '飲水 ' + fin + ' ml' : '') +
+            (fin && fout ? '\u3000·\u3000' : '') + (fout ? '尿量 ' + fout + ' ml' : '')));
+        }
+        box.appendChild(d);
+      })(ks[i]);
+    }
+  }
+
+  /* ---------- 趨勢圖（手繪 SVG，無外部函式庫） ---------- */
+  var RANGES = [ {n:'7 天',d:7}, {n:'30 天',d:30}, {n:'90 天',d:90}, {n:'全部',d:0} ];
+  var curRange = 30;
+  (function buildRangeChips(){
+    var box = $('rangeChips'), i;
+    for(i = 0; i < RANGES.length; i++){
+      (function(r){
+        var b = el('button','chip',r.n);
+        b.type = 'button';
+        b.addEventListener('click', function(){ curRange = r.d; paintRange(); renderChart(); });
+        box.appendChild(b);
+      })(RANGES[i]);
+    }
+    paintRange();
+  })();
+  function paintRange(){
+    var cs = $('rangeChips').childNodes, i;
+    for(i = 0; i < cs.length; i++){
+      cs[i].className = (cs[i].textContent === labelOfRange()) ? 'chip on' : 'chip';
+    }
+  }
+  function labelOfRange(){
+    var i;
+    for(i = 0; i < RANGES.length; i++){ if(RANGES[i].d === curRange) return RANGES[i].n; }
+    return '';
+  }
+  function seriesWeight(){
+    var ks = sortedDates(), out = [], i, cutoff = null;
+    if(curRange) cutoff = shift(todayKey(), -(curRange - 1));
+    for(i = 0; i < ks.length; i++){
+      if(cutoff && ks[i] < cutoff) continue;
+      out.push({ k:ks[i], v:data.weights[ks[i]] });
+    }
+    return out;
+  }
+  function seriesKcal(){
+    var ks = [], k, out = [], i, cutoff = null;
+    if(curRange) cutoff = shift(todayKey(), -(curRange - 1));
+    for(k in data.meals){ if(data.meals.hasOwnProperty(k)) ks.push(k); }
+    ks.sort();
+    for(i = 0; i < ks.length; i++){
+      if(cutoff && ks[i] < cutoff) continue;
+      var ms = data.meals[ks[i]], j, t = 0;
+      for(j = 0; j < ms.length; j++) t += (ms[j].k || 0);
+      if(t > 0) out.push({ k:ks[i], v:t });
+    }
+    return out;
+  }
+  function svgTag(inner, w, h){
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid meet" role="img">' + inner + '</svg>';
+  }
+  function renderChart(){
+    var pts = seriesWeight(), i;
+    var last = pts.length ? pts[pts.length-1].v : null;
+    var first = pts.length ? pts[0].v : null;
+    var s = 0;
+    for(i = 0; i < pts.length; i++) s += pts[i].v;
+    $('sLast').textContent = last === null ? '—' : fmt(last);
+    var lastBmi = last === null ? null : bmiOf(last);
+    $('sBmi').textContent = lastBmi === null ? '' : 'BMI ' + lastBmi.toFixed(1);
+    if(pts.length > 1){
+      var df = r1(last - first);
+      $('sDiff').textContent = (df > 0 ? '+' : '') + df.toFixed(1);
+      $('sDiff').style.color = df > 0 ? 'var(--amber)' : (df < 0 ? 'var(--pine)' : '');
+    }else{ $('sDiff').textContent = '—'; $('sDiff').style.color = ''; }
+    $('sAvg').textContent = pts.length ? fmt(s / pts.length) : '—';
+
+    var W = 340, H = 190, PL = 34, PR = 8, PT = 12, PB = 22;
+    var box = $('chartWeight');
+    if(!pts.length){
+      box.innerHTML = '';
+      box.appendChild(el('p','note','這段期間沒有體重紀錄。'));
+      renderVitalCharts();
+      return;
+    }
+    var goal = parseFloat(data.settings.goal);
+    var vals = [], lo, hi;
+    for(i = 0; i < pts.length; i++) vals.push(pts[i].v);
+    if(!isNaN(goal)) vals.push(goal);
+    lo = Math.min.apply(null, vals); hi = Math.max.apply(null, vals);
+    if(hi - lo < 1){ lo -= 0.6; hi += 0.6; }
+    var padv = (hi - lo) * 0.18; lo -= padv; hi += padv;
+    function X(i2){ return pts.length === 1 ? (PL + (W-PL-PR)/2) : PL + (W-PL-PR) * i2 / (pts.length-1); }
+    function Y(v){ return PT + (H-PT-PB) * (hi - v) / (hi - lo); }
+
+    var g = '', gl;
+    for(gl = 0; gl <= 3; gl++){
+      var vv = lo + (hi - lo) * gl / 3, y = Y(vv);
+      g += '<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W-PR) + '" y2="' + y.toFixed(1) +
+           '" stroke="var(--line)" stroke-width="1"/>';
+      g += '<text x="' + (PL-6) + '" y="' + (y+3.5).toFixed(1) + '" text-anchor="end" font-size="9" fill="var(--soft)">' +
+           vv.toFixed(1) + '</text>';
+    }
+    if(!isNaN(goal) && goal >= lo && goal <= hi){
+      g += '<line x1="' + PL + '" y1="' + Y(goal).toFixed(1) + '" x2="' + (W-PR) + '" y2="' + Y(goal).toFixed(1) +
+           '" stroke="var(--amber)" stroke-width="1.2" stroke-dasharray="4 4"/>';
+    }
+    var dpath = '', area = '';
+    for(i = 0; i < pts.length; i++){
+      dpath += (i ? ' L' : 'M') + X(i).toFixed(1) + ' ' + Y(pts[i].v).toFixed(1);
+    }
+    if(pts.length > 1){
+      area = dpath + ' L' + X(pts.length-1).toFixed(1) + ' ' + (H-PB) + ' L' + X(0).toFixed(1) + ' ' + (H-PB) + ' Z';
+      g += '<path d="' + area + '" fill="var(--pine)" opacity="0.08"/>';
+      g += '<path d="' + dpath + '" fill="none" stroke="var(--pine)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+    }
+    for(i = 0; i < pts.length; i++){
+      var rr = (pts.length > 40) ? 1.6 : 2.8;
+      g += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(pts[i].v).toFixed(1) + '" r="' + rr +
+           '" fill="var(--card)" stroke="var(--pine)" stroke-width="1.8"/>';
+    }
+    g += '<text x="' + PL + '" y="' + (H-6) + '" font-size="9" fill="var(--soft)">' + label(pts[0].k) + '</text>';
+    if(pts.length > 1){
+      g += '<text x="' + (W-PR) + '" y="' + (H-6) + '" text-anchor="end" font-size="9" fill="var(--soft)">' +
+           label(pts[pts.length-1].k) + '</text>';
+    }
+    box.innerHTML = svgTag(g, W, H);
+
+    /* 熱量長條 */
+    var kp = seriesKcal();
+    $('kcalCard').hidden = (kp.length === 0);
+    if(kp.length){
+      var KH = 150, maxk = 0, bw, gap;
+      for(i = 0; i < kp.length; i++) if(kp[i].v > maxk) maxk = kp[i].v;
+      var kg = '';
+      gap = kp.length > 20 ? 1 : 4;
+      bw = (W - PL - PR - gap * (kp.length-1)) / kp.length;
+      if(bw < 1.5) bw = 1.5;
+      if(bw > 30) bw = 30;
+      for(i = 0; i < kp.length; i++){
+        var bh = (KH - PT - PB) * kp[i].v / maxk;
+        var bx = PL + i * (bw + gap);
+        kg += '<rect x="' + bx.toFixed(1) + '" y="' + (KH - PB - bh).toFixed(1) + '" width="' + bw.toFixed(1) +
+              '" height="' + bh.toFixed(1) + '" rx="' + (bw > 6 ? 2 : 0.8) + '" fill="var(--amber)" opacity="0.85"/>';
+      }
+      kg += '<line x1="' + PL + '" y1="' + (KH-PB) + '" x2="' + (W-PR) + '" y2="' + (KH-PB) + '" stroke="var(--line)"/>';
+      kg += '<text x="' + (PL-6) + '" y="' + (PT+8) + '" text-anchor="end" font-size="9" fill="var(--soft)">' + maxk + '</text>';
+      kg += '<text x="' + PL + '" y="' + (KH-6) + '" font-size="9" fill="var(--soft)">' + label(kp[0].k) + '</text>';
+      if(kp.length > 1){
+        kg += '<text x="' + (W-PR) + '" y="' + (KH-6) + '" text-anchor="end" font-size="9" fill="var(--soft)">' +
+              label(kp[kp.length-1].k) + '</text>';
+      }
+      $('chartKcal').innerHTML = svgTag(kg, W, KH);
+    }
+    renderVitalCharts();
+  }
+
+  /* ---------- 設定 ---------- */
+  $('goalW').value = data.settings.goal || '';
+  $('heightCm').value = data.settings.height || '';
+  $('goalSave').addEventListener('click', function(){
+    var hs = $('heightCm').value.replace(/^\s+|\s+$/g,'');
+    if(hs === ''){ delete data.settings.height; }
+    else{
+      var h = parseFloat(hs);
+      if(isNaN(h) || h < 80 || h > 250){ toast('身高請填 80 到 250 公分之間'); return; }
+      data.settings.height = r1(h);
+    }
+    var gs = $('goalW').value.replace(/^\s+|\s+$/g,'');
+    if(gs === ''){ delete data.settings.goal; }
+    else{
+      var v = parseFloat(gs);
+      if(isNaN(v) || v <= 0 || v > 400){ toast('目標體重請填 0 到 400 之間'); return; }
+      data.settings.goal = r1(v);
+    }
+    save(); renderWeight(); renderChart();
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    toast('已儲存');
+  });
+
+  function download(name, text, mime){
+    try{
+      var blob = new Blob([text], { type: mime + ';charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+      toast('已匯出 ' + name);
+    }catch(e){ toast('這個瀏覽器不支援下載，請改用複製'); }
+  }
+  function buildBackup(cb){
+    var out = { weights:data.weights, meals:data.meals, settings:data.settings,
+                vitals:data.vitals, fluids:data.fluids };
+    if(!$('withPhotos').checked){ cb(out); return; }
+    var ph = {};
+    photoEach(function(id, full, thumb){ ph[id] = { f:full, t:thumb }; },
+              function(){ out.photos = ph; cb(out); });
+  }
+  $('expJson').addEventListener('click', function(){
+    if($('withPhotos').checked) toast('正在打包照片…');
+    buildBackup(function(out){
+      download('daily-log-' + todayKey() + '.json', JSON.stringify(out), 'application/json');
+    });
+  });
+  $('expCsv').addEventListener('click', function(){
+    var ks = allDates().slice().reverse(), i, j, rows = ['日期,時間,類型,內容,數值,單位'];
+    function q(x){ return '"' + String(x).replace(/"/g,'""') + '"'; }
+    for(i = 0; i < ks.length; i++){
+      var k = ks[i];
+      if(data.weights[k] !== undefined) rows.push([k, '', '體重', '', fmt(data.weights[k]), 'kg'].join(','));
+      var vs = data.vitals[k] || [];
+      for(j = 0; j < vs.length; j++){
+        rows.push([k, vs[j].t, '血壓', '收縮壓', vs[j].s, 'mmHg'].join(','));
+        rows.push([k, vs[j].t, '血壓', '舒張壓', vs[j].d, 'mmHg'].join(','));
+        if(vs[j].p) rows.push([k, vs[j].t, '脈搏', '', vs[j].p, 'bpm'].join(','));
+      }
+      var fs = data.fluids[k] || [];
+      for(j = 0; j < fs.length; j++){
+        rows.push([k, fs[j].t, (fs[j].k === 'in' ? '飲水' : '尿量'), '', fs[j].ml, 'ml'].join(','));
+      }
+      var ms = data.meals[k] || [];
+      for(j = 0; j < ms.length; j++){
+        rows.push([k, '', '飲食', q(ms[j].t + '：' + ms[j].n), (ms[j].k || ''), (ms[j].k ? '大卡' : '')].join(','));
+      }
+    }
+    download('daily-log-' + todayKey() + '.csv', '\ufeff' + rows.join('\n'), 'text/csv');
+  });
+
+  $('copyJson').addEventListener('click', function(){
+    var s = JSON.stringify(data);
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(s).then(function(){ toast('已複製'); }, function(){ fallbackCopy(s); });
+    }else fallbackCopy(s);
+  });
+  function fallbackCopy(s){
+    var ta = document.createElement('textarea');
+    ta.value = s; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand('copy'); toast('已複製'); }
+    catch(e){ toast('複製失敗，請改用下載'); }
+    document.body.removeChild(ta);
+  }
+  $('impRun').addEventListener('click', function(){
+    var t = $('impText').value.replace(/^\s+|\s+$/g,'');
+    if(!t){ toast('請先貼上 JSON'); return; }
+    var o;
+    try{ o = JSON.parse(t); }catch(e){ toast('格式不正確，無法解析'); return; }
+    if(!o || typeof o !== 'object'){ toast('格式不正確，無法解析'); return; }
+    var k, n = 0;
+    if(o.weights){ for(k in o.weights){ if(o.weights.hasOwnProperty(k)){ data.weights[k] = o.weights[k]; n++; } } }
+    if(o.meals){
+      for(k in o.meals){
+        if(!o.meals.hasOwnProperty(k)) continue;
+        if(!data.meals[k]) data.meals[k] = [];
+        var arr = o.meals[k], i;
+        for(i = 0; i < arr.length; i++){
+          var dup = false, j;
+          for(j = 0; j < data.meals[k].length; j++){ if(data.meals[k][j].id === arr[i].id) dup = true; }
+          if(!dup){ data.meals[k].push(arr[i]); n++; }
+        }
+      }
+    }
+    if(o.photos){
+      var pk;
+      for(pk in o.photos){
+        if(!o.photos.hasOwnProperty(pk)) continue;
+        (function(id, rec){ photoPut(id, rec.f, rec.t, null); })(pk, o.photos[pk]);
+      }
+      setTimeout(function(){ renderMeals(); renderLog(); refreshPhotoNote(); }, 400);
+    }
+    var extra = ['vitals','fluids'], ei;
+    for(ei = 0; ei < extra.length; ei++){
+      var src = o[extra[ei]];
+      if(!src) continue;
+      for(k in src){
+        if(!src.hasOwnProperty(k)) continue;
+        if(!data[extra[ei]][k]) data[extra[ei]][k] = [];
+        var ar = src[k], q, w2;
+        for(q = 0; q < ar.length; q++){
+          var dup2 = false;
+          for(w2 = 0; w2 < data[extra[ei]][k].length; w2++){ if(data[extra[ei]][k][w2].id === ar[q].id) dup2 = true; }
+          if(!dup2){ data[extra[ei]][k].push(ar[q]); n++; }
+        }
+      }
+    }
+    if(o.settings && o.settings.goal) data.settings.goal = o.settings.goal;
+    if(o.settings && o.settings.height) data.settings.height = o.settings.height;
+    save(); $('impText').value = '';
+    $('goalW').value = data.settings.goal || '';
+    $('heightCm').value = data.settings.height || '';
+    renderAll();
+    toast('已匯入 ' + n + ' 筆');
+  });
+  $('clearPhotos').addEventListener('click', function(){
+    ask('刪除所有照片？文字紀錄會保留，但照片無法復原。', function(){
+      photoKeys(function(keys){
+        photoDel(keys, function(){
+          var k, i;
+          for(k in data.meals){
+            if(!data.meals.hasOwnProperty(k)) continue;
+            for(i = 0; i < data.meals[k].length; i++) delete data.meals[k][i].p;
+          }
+          save(); renderMeals(); renderLog(); refreshPhotoNote();
+          toast('已刪除所有照片');
+        });
+      });
+    });
+  });
+
+  $('wipe').addEventListener('click', function(){
+    ask('清除所有體重與飲食紀錄？這個動作無法復原。', function(){
+      photoKeys(function(keys){ photoDel(keys, refreshPhotoNote); });
+      data = { weights:{}, meals:{}, settings:{}, vitals:{}, fluids:{} };
+      save(); $('goalW').value = ''; $('heightCm').value = '';
+      cur = todayKey(); renderAll();
+      toast('已清除所有紀錄');
+    });
+  });
+
+  /* ---------- 分頁 ---------- */
+  function switchTo(v){
+    var ts = $('tabs').childNodes, i;
+    for(i = 0; i < ts.length; i++){
+      if(ts[i].nodeType !== 1) continue;
+      ts[i].className = (ts[i].getAttribute('data-v') === v) ? 'tab on' : 'tab';
+    }
+    var vs = document.querySelectorAll('.view'), j;
+    for(j = 0; j < vs.length; j++){
+      vs[j].className = (vs[j].id === 'v-' + v) ? 'view on' : 'view';
+    }
+    document.querySelector('.datebar').style.display = (v === 'today') ? '' : 'none';
+    if(v === 'set') refreshPhotoNote();
+  }
+  (function bindTabs(){
+    var ts = $('tabs').childNodes, i;
+    for(i = 0; i < ts.length; i++){
+      if(ts[i].nodeType !== 1) continue;
+      (function(b){
+        b.addEventListener('click', function(){
+          switchTo(b.getAttribute('data-v'));
+          window.scrollTo(0,0);
+        });
+      })(ts[i]);
+    }
+  })();
+
+  /* ---------- 首次繪製 ---------- */
+  function renderAll(){
+    renderDate(); renderWeight(); renderMeals(); renderVitals(); renderFluids();
+    renderLog(); renderChart();
+    $('bpT').value = nowHM(); $('flT').value = nowHM();
+  }
+  $('storeNote').textContent = usingMem
+    ? '目前無法使用瀏覽器儲存空間（可能是無痕模式或預覽環境），資料只保留在這個分頁，關閉就會消失。部署到網站後即可正常保存。'
+    : '文字紀錄存在瀏覽器的 localStorage，照片存在 IndexedDB，都只在這台裝置上，不會上傳。換裝置或清除瀏覽資料前，記得先匯出備份。';
+  renderAll();
+  setTimeout(gcPhotos, 1200);
+
+  /* Service Worker：離線快取 */
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').then(function(reg){
+        reg.addEventListener('updatefound', function(){
+          var sw = reg.installing;
+          if(!sw) return;
+          sw.addEventListener('statechange', function(){
+            if(sw.state === 'installed' && navigator.serviceWorker.controller){
+              toast('已下載新版本，關掉再開就會套用');
+            }
+          });
+        });
+      }, function(){});
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
